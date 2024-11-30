@@ -13,8 +13,8 @@ TODO:
 */
 
 public class ColorPane extends GGen {
-    GPlane shards[24];
-    0.1 => float xScaleFactor;
+    GPlane shards[48];
+    0.05 => float xScaleFactor;
     2. => float yScaleFactor;
 
     -1 => int noteDiff;
@@ -214,7 +214,5 @@ public class ColorVisualizer {
             }
 
         }
-
-
     }
 }

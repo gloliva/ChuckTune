@@ -42,6 +42,13 @@ ColorVisualizer visualizer(EDO12);
 KeyPoller kp;
 Keyboard kb(file12Edo);
 
+// ColorPane Test
+// ColorPane paneTest(3);
+// paneTest.setColorGradient(Color.RED * 3, Color.BLUE * 3);
+// paneTest.setPos(0., 1.5, 0.);
+// paneTest.attach();
+
+
 while (true) {
     kp.getKeyPress() @=> Key keysDown[];
 
@@ -77,34 +84,3 @@ while (true) {
     }
     UI.end();
 }
-
-
-// EDO EDO31(440., 31);
-// DiatonicJI dji(440.);
-
-// TriOsc osc1;
-// TriOsc osc2;
-// TriOsc osc3;
-
-// osc1 => Gain g1(0.1) => dac;
-// osc2 => Gain g2(0.1) => dac;
-// osc3 => Gain g3(0.1) => dac;
-
-// <<< "12TET" >>>;
-// EDO12.freq(1) => osc1.freq;
-// EDO12.freq(5) => osc2.freq;
-// EDO12.freq(8) => osc3.freq;
-// 2::second => now;
-
-// <<< "JI" >>>;
-// dji.freq(1) => osc1.freq;
-// dji.freq(3) => osc2.freq;
-// dji.freq(5) => osc3.freq;
-// 2::second => now;
-
-// <<< "31EDO" >>>;
-// EDO31.freq(1) => osc1.freq;
-// EDO31.freq(11) => osc2.freq;
-// EDO31.freq(19) => osc3.freq;
-
-// 2::second => now;
