@@ -123,7 +123,8 @@ public class Keyboard {
 
 
 public class KeyboardKey extends GGen {
-    GPlane border;
+    // GPlane border;
+    GCube border;
     GPlane inside;
     GText noteLetter;
     GText keyboardLetter;
@@ -134,11 +135,13 @@ public class KeyboardKey extends GGen {
 
     fun @construct(string noteText, string keyboardText) {
         // Position
+        -0.05 => this.border.posZ;
         0.01 => this.inside.posZ;
         0.02 => this.noteLetter.posZ;
         @(0.35, -0.35, 0.02) => this.keyboardLetter.pos;
 
         // Scale
+        0.1 => this.border.scaZ;
         @(0.95, 0.95, 0.95) => this.inside.sca;
         @(0.5, 0.5, 0.5) => this.noteLetter.sca;
         @(0.2, 0.2, 0.2) => this.keyboardLetter.sca;
@@ -177,6 +180,14 @@ public class KeyboardKey extends GGen {
     fun void setTextColor(vec3 color) {
         @(color.x, color.y, color.z, 1.) => this.noteLetter.color;
         @(color.x, color.y, color.z, 1.) => this.keyboardLetter.color;
+    }
+
+    fun void press() {
+        0.1 => this.posZ;
+    }
+
+    fun void release() {
+        0 => this.posZ;
     }
 
     fun void setPosX(float x) {
@@ -228,6 +239,14 @@ public class KeyboardRow extends GGen {
         this.row[col].setColor(keyColor);
         this.row[col].setTextColor(textColor);
     }
+
+    fun void pressKey(int col) {
+         this.row[col].press();
+    }
+
+    fun void releaseKey(int col) {
+        this.row[col].release();
+    }
 }
 
 
@@ -243,6 +262,9 @@ public class KeyboardVisuals extends GGen {
 
             // Scale row
             @(0.6, 0.6, 0.6) => row.sca;
+
+            // Rotate
+            -0.8 => this.rotX;
 
             // Set positions
             row.setPosX(xPos[idx]);
@@ -272,5 +294,13 @@ public class KeyboardVisuals extends GGen {
 
     fun void setKeyColor(vec3 keyColor, vec3 textColor, int row, int col) {
         this.rows[row].setKeyColor(keyColor, textColor, col);
+    }
+
+    fun void pressKey(int row, int col) {
+         this.rows[row].pressKey(col);
+    }
+
+    fun void releaseKey(int row, int col) {
+        this.rows[row].releaseKey(col);
     }
 }

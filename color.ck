@@ -74,7 +74,8 @@ public class AudioColorMapper {
         Std.scalef(freq, octaveBounds.lowerFreq, octaveBounds.upperFreq, blueMin, blueMax) => float blue;
 
         // Base intensity from Octave register
-        octaveBounds.register + 1 => float intensity;
+        // octaveBounds.register + 1 => float intensity;
+        1 => float intensity;
         @(red * intensity, green * intensity, blue * intensity) => vec3 retColor;
         return retColor;
     }
@@ -90,8 +91,8 @@ public class AudioColorMapper {
         }
 
         this.colors[currColorIdx] => vec3 lowerColor;
-        this.colors[( currColorIdx + 1 ) % this.numColors] => vec3 uppperColor;
+        this.colors[( currColorIdx + 1 ) % this.numColors] => vec3 upperColor;
 
-        return new ColorBounds(lowerColor, uppperColor, freqIncrement);
+        return new ColorBounds(lowerColor, upperColor, freqIncrement);
     }
 }

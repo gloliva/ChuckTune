@@ -43,22 +43,23 @@ KeyPoller kp;
 Keyboard kb(file12Edo);
 
 // ColorPane Test
-// ColorPane paneTest(3);
-// paneTest.setColorGradient(Color.RED * 3, Color.BLUE * 3);
-// paneTest.setPos(0., 1.5, 0.);
-// paneTest.attach();
+// visualizer.setColorGradient(Color.RED * 3, Color.BLUE * 3);
+visualizer.setPos(0., 1.5, 0.);
 
+
+// <<< "COLOR: ", Color.hsv2rgb(@(270, 1, 1)) * 255. >>>;
 
 while (true) {
     kp.getKeyPress() @=> Key keysDown[];
 
     for (Key key : keysDown) {
-        <<< "Note on", key.key >>>;
-
         kb.getMidiNote(key.key) => int note;
         inst.voiceOn(key.key, note);
         colorMapper.freqToColor( register, inst.getVoice(key.key).freq() ) @=> vec3 keyColor;
-        kb.visuals.setKeyColor(keyColor, Color.BLACK, key.keyRow, key.keyCol);
+        <<< "Key", key.key, "Color", keyColor * 255. >>>;
+        // kb.visuals.setKeyColor(keyColor, Color.BLACK, key.keyRow, key.keyCol);
+        kb.visuals.setKeyColor(keyColor, Color.WHITE * 4, key.keyRow, key.keyCol);
+        kb.visuals.pressKey(key.keyRow, key.keyCol);
 
         kb.getNoteDiff(key.key) => int noteDiff;
         visualizer.addPane(key.key, keyColor, noteDiff);
@@ -67,10 +68,9 @@ while (true) {
 
     kp.getKeyRelease() @=> Key keysUp[];
     for (Key key : keysUp) {
-        <<< "Note off", key.key >>>;
-
         inst.voiceOff(key.key);
         kb.visuals.setKeyColor(Color.BLACK, Color.WHITE * 2., key.keyRow, key.keyCol);
+        kb.visuals.releaseKey(key.keyRow, key.keyCol);
         visualizer.removePane(key.key);
     }
 
