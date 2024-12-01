@@ -101,6 +101,7 @@ public class TuningRegister {
 public class Tuning {
     float startFreq;
     float freqDegrees[0];
+    int divisions;
 
     TuningFile @ file;
     TuningRegister register;
@@ -113,53 +114,6 @@ public class Tuning {
     fun @construct(TuningFile file, float startFreq) {
         file @=> this.file;
         startFreq => this.startFreq;
-    }
-
-    fun float freq(int degree) {
-        return this.freqDegrees[degree - 1];
-    }
-
-    fun void print() {
-        for (int degree; degree < this.freqDegrees.size(); degree++){
-            <<< "Degree:", degree, "Freq", (this.freqDegrees[degree]) >>>;
-        }
-    }
-}
-
-
-public class DiatonicJI extends Tuning {
-    int divisions;
-    [
-        1.,
-        9./8.,
-        5./4.,
-        4./3.,
-        3./2.,
-        5./3.,
-        15./8.
-    ] @=> float stepMultiplier[];
-
-    fun @construct(TuningFile file, float startFreq) {
-        Tuning(file, startFreq);
-        7 => this.divisions;
-
-        for (int degree; degree < divisions; degree++) {
-            this.freqDegrees << this.startFreq * this.stepMultiplier[degree];
-        }
-    }
-}
-
-public class EDO extends Tuning {
-    int divisions;
-
-    fun @construct(TuningFile file, float startFreq, int divisions) {
-        Tuning(file, startFreq);
-        divisions => this.divisions;
-
-        for (int degree; degree < divisions; degree++) {
-            Math.exp2(degree$float / divisions$float) => float freqStep;
-            this.freqDegrees << this.startFreq * freqStep;
-        }
     }
 
     fun float freq(int degree) {
@@ -188,6 +142,74 @@ public class EDO extends Tuning {
         }
 
         return freq;
+    }
+
+    fun void print() {
+        for (int degree; degree < this.freqDegrees.size(); degree++){
+            <<< "Degree:", degree, "Freq", (this.freqDegrees[degree]) >>>;
+        }
+    }
+}
+
+
+public class DiatonicJI extends Tuning {
+    [
+        1.,
+        9./8.,
+        5./4.,
+        4./3.,
+        3./2.,
+        5./3.,
+        15./8.
+    ] @=> float stepMultiplier[];
+
+    fun @construct(TuningFile file, float startFreq) {
+        Tuning(file, startFreq);
+        7 => this.divisions;
+
+        for (int degree; degree < divisions; degree++) {
+            this.freqDegrees << this.startFreq * this.stepMultiplier[degree];
+        }
+    }
+}
+
+
+public class Pythagorean extends Tuning {
+    [
+        1.,
+        256./243,
+        9./8.,
+        32./27.,
+        81./64.,
+        4./3.,
+        1024./729.,
+        3./2.,
+        128./81.,
+        27./16.,
+        16./9.,
+        243./128.
+    ] @=> float stepMultiplier[];
+
+    fun @construct(TuningFile file, float startFreq) {
+        Tuning(file, startFreq);
+        12 => this.divisions;
+
+        for (int degree; degree < divisions; degree++) {
+            this.freqDegrees << this.startFreq * this.stepMultiplier[degree];
+        }
+    }
+}
+
+
+public class EDO extends Tuning {
+    fun @construct(TuningFile file, float startFreq, int divisions) {
+        Tuning(file, startFreq);
+        divisions => this.divisions;
+
+        for (int degree; degree < divisions; degree++) {
+            Math.exp2(degree$float / divisions$float) => float freqStep;
+            this.freqDegrees << this.startFreq * freqStep;
+        }
     }
 
     fun void print() {

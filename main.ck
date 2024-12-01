@@ -27,10 +27,18 @@ bloom.levels(4);
 
 // Tunings
 FileReader file;
+file.parseFile("tunings/5edo.txt") @=> TuningFile file5Edo;
+file.parseFile("tunings/7edo.txt") @=> TuningFile file7Edo;
 file.parseFile("tunings/12edo.txt") @=> TuningFile file12Edo;
 file.parseFile("tunings/19edo.txt") @=> TuningFile file19Edo;
+file.parseFile("tunings/pythagorean.txt") @=> TuningFile filePy;
+
+EDO EDO5(file5Edo, 130.81, 5);
+EDO EDO7(file7Edo, 130.81, 7);
 EDO EDO12(file12Edo, 130.81, 12);
 EDO EDO19(file19Edo, 130.81, 19);
+Pythagorean PY(filePy, 130.81);
+
 TuningRegister register;
 
 // Instruments
@@ -39,12 +47,12 @@ Instrument inst(state);
 
 // Visuals
 AudioColorMapper colorMapper;
-ColorVisualizer visualizer(EDO19);
+ColorVisualizer visualizer(PY);
 visualizer.setPos(0., 1.5, 0.);
 
 // Keyboard and Input
 KeyPoller kp;
-Keyboard kb(EDO19);
+Keyboard kb(PY);
 
 // Node Test
 Node node("A#", Color.BLUE);
