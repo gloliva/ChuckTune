@@ -5,6 +5,7 @@
 @import "keyboard.ck"
 @import "nodes.ck"
 @import "tuning.ck"
+@import "ui.ck"
 @import "visualizer.ck"
 
 
@@ -39,6 +40,15 @@ EDO EDO12(file12Edo, 130.81, 12);
 EDO EDO19(file19Edo, 130.81, 19);
 Pythagorean PY(filePy, 130.81);
 
+
+[
+    EDO12,
+    PY,
+    EDO19,
+    EDO5,
+    EDO7,
+] @=> Tuning tunings[];
+TuningManager tuningManager(tunings);
 TuningRegister register;
 
 // Instruments
@@ -47,12 +57,16 @@ Instrument inst(state);
 
 // Visuals
 AudioColorMapper colorMapper;
-ColorVisualizer visualizer(PY);
+ColorVisualizer visualizer(tuningManager.getTuning());
 visualizer.setPos(0., 1.5, 0.);
 
-// Keyboard and Input
+// Keyboard and Mouse Input
 KeyPoller kp;
-Keyboard kb(PY);
+Keyboard kb(tuningManager.getTuning());
+MousePoller mp;
+
+// UI
+TuningSelect tuningUI;
 
 // Node Test
 Node node("A#", Color.BLUE);
@@ -60,7 +74,21 @@ Node node("A#", Color.BLUE);
 
 while (true) {
     kp.getKeyPress() @=> Key keysDown[];
+    mp.getMouseInfo() @=> MouseInfo mouseInfo;
 
+    // Update tuning
+    if (mouseInfo.leftDown == 1) {
+        tuningUI.checkIfSelected(mouseInfo.pos) => int selectMode;
+        <<< "Select mode:", selectMode >>>;
+
+        if (selectMode != 0) {
+            tuningManager.changeTuning(selectMode);
+            kb.updateTuning(tuningManager.getTuning());
+            tuningUI.setText(tuningManager.getTuning().name);
+        }
+    }
+
+    // Handle Key presses
     for (Key key : keysDown) {
         kb.getFreq(key.key) => float freq;
         inst.voiceOn(key.key, freq);

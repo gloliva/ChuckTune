@@ -102,6 +102,7 @@ public class Tuning {
     float startFreq;
     float freqDegrees[0];
     int divisions;
+    string name;
 
     TuningFile @ file;
     TuningRegister register;
@@ -114,6 +115,7 @@ public class Tuning {
     fun @construct(TuningFile file, float startFreq) {
         file @=> this.file;
         startFreq => this.startFreq;
+        "Default Tuning" => this.name;
     }
 
     fun float freq(int degree) {
@@ -193,6 +195,7 @@ public class Pythagorean extends Tuning {
     fun @construct(TuningFile file, float startFreq) {
         Tuning(file, startFreq);
         12 => this.divisions;
+        "Pythagorean" => this.name;
 
         for (int degree; degree < divisions; degree++) {
             this.freqDegrees << this.startFreq * this.stepMultiplier[degree];
@@ -205,6 +208,7 @@ public class EDO extends Tuning {
     fun @construct(TuningFile file, float startFreq, int divisions) {
         Tuning(file, startFreq);
         divisions => this.divisions;
+        divisions + " EDO" => this.name;
 
         for (int degree; degree < divisions; degree++) {
             Math.exp2(degree$float / divisions$float) => float freqStep;
@@ -217,5 +221,32 @@ public class EDO extends Tuning {
         for (int degree; degree < this.freqDegrees.size(); degree++){
             <<< "Degree:", degree, "Freq", (this.freqDegrees[degree]) >>>;
         }
+    }
+}
+
+
+public class TuningManager {
+    Tuning tunings[];
+    int numTunings;
+    int selected;
+
+    fun @construct(Tuning tunings[]) {
+        tunings @=> this.tunings;
+        tunings.size() => this.numTunings;
+        0 => selected;
+    }
+
+    fun changeTuning(int diff) {
+        this.selected + diff => this.selected;
+
+        if (this.selected < 0) {
+            this.selected + this.numTunings => this.selected;
+        }
+
+        this.selected % this.numTunings => this.selected;
+    }
+
+    fun Tuning getTuning() {
+        return this.tunings[this.selected];
     }
 }

@@ -33,7 +33,7 @@ public class Keyboard {
 
     fun void updateTuning(Tuning tuning) {
         tuning @=> this.tuning;
-        this.setUpVisuals();
+        this.updateVisuals();
     }
 
     fun void setUpKeyMapping() {
@@ -71,7 +71,18 @@ public class Keyboard {
             for (string key : this.keyboardLayout[row]) {
                 this.tuning.file.keyboardToMidi[key] => int idx;
                 this.tuning.file.get(idx) => string note;
-                this.visuals.set(row, note, key);
+                this.visuals.addKey(row, note, key);
+            }
+        }
+    }
+
+    fun void updateVisuals() {
+        for (int row; row < this.keyboardLayout.size(); row++) {
+            for (int col; col < this.keyboardLayout[row].size(); col++) {
+                this.keyboardLayout[row][col] => string key;
+                this.tuning.file.keyboardToMidi[key] => int idx;
+                this.tuning.file.get(idx) => string note;
+                this.visuals.updateKey(row, col, note);
             }
         }
     }
@@ -173,6 +184,10 @@ public class KeyboardRow extends GGen {
         key --> this;
     }
 
+    fun void updateKey(string noteText, int keyIdx) {
+        this.row[keyIdx].setText(noteText);
+    }
+
     fun void setRowID(int id) {
         id => this.rowID;
         "Row" + id => this.name;
@@ -239,8 +254,12 @@ public class KeyboardVisuals extends GGen {
         this --> GG.scene();
     }
 
-    fun void set(int row, string note, string key) {
+    fun void addKey(int row, string note, string key) {
         this.rows[row].addKey(note, key);
+    }
+
+    fun void updateKey(int row, int col, string note) {
+        this.rows[row].updateKey(note, col);
     }
 
     fun void setKeyColor(vec3 keyColor, int row, int col) {

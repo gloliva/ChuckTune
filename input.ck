@@ -236,3 +236,29 @@ public class KeyPoller {
         return keys;
     }
 }
+
+// Left  x: 110 - 140 y: 1367 - 1395
+// Right x: 195 - 225 y: 1367 - 1395
+public class MouseInfo {
+    vec2 pos;
+    int leftDown;
+
+    fun @construct(vec2 pos, int leftDown) {
+        pos => this.pos;
+        leftDown => this.leftDown;
+    }
+
+    fun void print() {
+        <<< "Mouse position:", this.pos, "Left Button Down:", this.leftDown >>>;
+    }
+}
+
+
+public class MousePoller {
+    fun MouseInfo getMouseInfo() {
+        GWindow.mousePos() => vec2 mousePos;
+        GWindow.mouseLeftDown() => int mouseLeftDown;
+        MouseInfo mouseInfo(mousePos, mouseLeftDown);
+        return mouseInfo;
+    }
+}
