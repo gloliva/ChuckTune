@@ -1,3 +1,11 @@
+/*
+
+    TODO: IDEAS
+    - Freeze Current band to compare to a different tuning (persists across tunings)
+    - Show band from different tuning at same time as current band
+
+*/
+
 @import "bloom.ck"
 @import "color.ck"
 @import "input.ck"
@@ -82,13 +90,20 @@ while (true) {
     // Update tuning
     if (mouseInfo.leftDown == 1) {
         tuningUI.checkIfSelected(mouseInfo.pos) => int selectMode;
-        <<< "Select mode:", selectMode >>>;
 
         if (selectMode != 0) {
             tuningManager.changeTuning(selectMode);
             kb.updateTuning(tuningManager.getTuning());
             tuningUI.setText(tuningManager.getTuning().name);
         }
+
+        if (selectMode == -1) tuningUI.clickLeft();
+        if (selectMode == 1) tuningUI.clickRight();
+    }
+
+    if (mouseInfo.leftUp == 1) {
+        if (tuningUI.leftButtonPressed == 1) tuningUI.resetLeft();
+        if (tuningUI.rightButtonPressed == 1) tuningUI.resetRight();
     }
 
     // Handle Key presses

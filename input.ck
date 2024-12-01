@@ -242,10 +242,12 @@ public class KeyPoller {
 public class MouseInfo {
     vec2 pos;
     int leftDown;
+    int leftUp;
 
-    fun @construct(vec2 pos, int leftDown) {
+    fun @construct(vec2 pos, int leftDown, int leftUp) {
         pos => this.pos;
         leftDown => this.leftDown;
+        leftUp => this.leftUp;
     }
 
     fun void print() {
@@ -258,7 +260,8 @@ public class MousePoller {
     fun MouseInfo getMouseInfo() {
         GWindow.mousePos() => vec2 mousePos;
         GWindow.mouseLeftDown() => int mouseLeftDown;
-        MouseInfo mouseInfo(mousePos, mouseLeftDown);
+        GWindow.mouseLeftUp() => int mouseLeftUp;
+        MouseInfo mouseInfo(mousePos, mouseLeftDown, mouseLeftUp);
         return mouseInfo;
     }
 }

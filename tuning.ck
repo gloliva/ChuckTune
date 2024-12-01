@@ -223,7 +223,7 @@ public class Pythagorean extends Tuning {
     fun @construct(TuningFile file, float startFreq) {
         Tuning(file, startFreq);
         12 => this.divisions;
-        "Pythagorean" => this.name;
+        "Pythag" => this.name;
 
         for (int degree; degree < divisions; degree++) {
             this.freqDegrees << this.startFreq * this.stepMultiplier[degree];
