@@ -28,7 +28,9 @@ bloom.levels(4);
 // Tunings
 FileReader file;
 file.parseFile("tunings/12edo.txt") @=> TuningFile file12Edo;
+file.parseFile("tunings/19edo.txt") @=> TuningFile file19Edo;
 EDO EDO12(file12Edo, 130.81, 12);
+EDO EDO19(file19Edo, 130.81, 19);
 TuningRegister register;
 
 // Instruments
@@ -37,12 +39,12 @@ Instrument inst(state);
 
 // Visuals
 AudioColorMapper colorMapper;
-ColorVisualizer visualizer(EDO12);
+ColorVisualizer visualizer(EDO19);
 visualizer.setPos(0., 1.5, 0.);
 
 // Keyboard and Input
 KeyPoller kp;
-Keyboard kb(EDO12);
+Keyboard kb(EDO19);
 
 // Node Test
 Node node("A#", Color.BLUE);

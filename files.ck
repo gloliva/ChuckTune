@@ -48,7 +48,7 @@ public class FileReader {
 
         // Read each line as a word
         repeat ( numNotes ) {
-            fio.readLine().upper() => string word;
+            fio.readLine() => string word;
 
             // Skip commented out lines
             if (word.charAt(0) != "#".charAt(0)) {
