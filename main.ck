@@ -33,17 +33,20 @@ file.parseFile("tunings/7edo.txt") @=> TuningFile file7Edo;
 file.parseFile("tunings/12edo.txt") @=> TuningFile file12Edo;
 file.parseFile("tunings/19edo.txt") @=> TuningFile file19Edo;
 file.parseFile("tunings/pythagorean.txt") @=> TuningFile filePy;
+file.parseFile("tunings/meantone.txt") @=> TuningFile fileMeantone;
 
 EDO EDO5(file5Edo, 130.81, 5);
 EDO EDO7(file7Edo, 130.81, 7);
 EDO EDO12(file12Edo, 130.81, 12);
 EDO EDO19(file19Edo, 130.81, 19);
 Pythagorean PY(filePy, 130.81);
+Meantone MEANTONE(fileMeantone, 130.81);
 
 
 [
     EDO12,
     PY,
+    MEANTONE,
     EDO19,
     EDO5,
     EDO7,

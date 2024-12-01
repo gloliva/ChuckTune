@@ -176,6 +176,34 @@ public class DiatonicJI extends Tuning {
 }
 
 
+public class Meantone extends Tuning {
+    [
+        1.,
+        1.07,
+        1.118,
+        1.1963,
+        1.25,
+        1.3375,
+        1.4311,
+        1.4953,
+        1.6,
+        1.6719,
+        1.7889,
+        1.8692,
+    ] @=> float stepMultiplier[];
+
+    fun @construct(TuningFile file, float startFreq) {
+        Tuning(file, startFreq);
+        12 => this.divisions;
+        "Meantone" => this.name;
+
+        for (int degree; degree < divisions; degree++) {
+            this.freqDegrees << this.startFreq * this.stepMultiplier[degree];
+        }
+    }
+}
+
+
 public class Pythagorean extends Tuning {
     [
         1.,
