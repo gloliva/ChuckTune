@@ -3,6 +3,7 @@
 @import "input.ck"
 @import "instrument.ck"
 @import "keyboard.ck"
+@import "nodes.ck"
 @import "tuning.ck"
 @import "visualizer.ck"
 
@@ -27,7 +28,7 @@ bloom.levels(4);
 // Tunings
 FileReader file;
 file.parseFile("tunings/12edo.txt") @=> TuningFile file12Edo;
-EDO EDO12(file12Edo, 440., 12);
+EDO EDO12(file12Edo, 130.81, 12);
 TuningRegister register;
 
 // Instruments
@@ -37,27 +38,24 @@ Instrument inst(state);
 // Visuals
 AudioColorMapper colorMapper;
 ColorVisualizer visualizer(EDO12);
+visualizer.setPos(0., 1.5, 0.);
 
 // Keyboard and Input
 KeyPoller kp;
-Keyboard kb(file12Edo);
+Keyboard kb(EDO12);
 
-// ColorPane Test
-// visualizer.setColorGradient(Color.RED * 3, Color.BLUE * 3);
-visualizer.setPos(0., 1.5, 0.);
+// Node Test
+Node node("A#", Color.BLUE);
 
-
-// <<< "COLOR: ", Color.hsv2rgb(@(270, 1, 1)) * 255. >>>;
 
 while (true) {
     kp.getKeyPress() @=> Key keysDown[];
 
     for (Key key : keysDown) {
-        kb.getMidiNote(key.key) => int note;
-        inst.voiceOn(key.key, note);
-        colorMapper.freqToColor( register, inst.getVoice(key.key).freq() ) @=> vec3 keyColor;
-        <<< "Key", key.key, "Color", keyColor * 255. >>>;
-        // kb.visuals.setKeyColor(keyColor, Color.BLACK, key.keyRow, key.keyCol);
+        kb.getFreq(key.key) => float freq;
+        inst.voiceOn(key.key, freq);
+
+        colorMapper.freqToColor( register, freq ) @=> vec3 keyColor;
         kb.visuals.setKeyColor(keyColor, Color.WHITE * 4, key.keyRow, key.keyCol);
         kb.visuals.pressKey(key.keyRow, key.keyCol);
 

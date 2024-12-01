@@ -2,22 +2,22 @@
 
 
 public class ColorBounds {
-    vec3 lowerColor;
-    vec3 upperColor;
+    int lowerHue;
+    int upperHue;
     float freqIncrement;
 
-    fun @construct(vec3 lowerColor, vec3 upperColor, float freqIncrement) {
-        lowerColor => this.lowerColor;
-        upperColor => this.upperColor;
+    fun @construct(int lowerHue, int upperHue, float freqIncrement) {
+        lowerHue => this.lowerHue;
+        upperHue => this.upperHue;
         freqIncrement => this.freqIncrement;
     }
 
-    fun void setLower(vec3 lowerColor) {
-        lowerColor => this.lowerColor;
+    fun void setLower(int lowerHue) {
+        lowerHue => this.lowerHue;
     }
 
-    fun void setUpper(vec3 upperColor) {
-        upperColor => this.upperColor;
+    fun void setUpper(int upperHue) {
+        upperHue => this.upperHue;
     }
 
     fun void setFreqIncrement(float freqIncrement) {
@@ -27,32 +27,17 @@ public class ColorBounds {
 
 
 public class AudioColorMapper {
-    255. => float RGBMax;
-
-    [
-        @(255., 0., 0.),
-        @(255., 128., 0.),
-        @(255., 255., 0.),
-        @(128., 255., 0.),
-        @(0., 255., 0.),
-        @(0., 255., 128.),
-        @(0., 255., 255.),
-        @(0., 128., 255.),
-        @(0., 0., 255.),
-        @(127., 0., 255.),
-        @(255., 0., 255.),
-        @(255., 0., 127.),
-    ] @=> vec3 colors[];
-
+    int hues[0];
     int numColors;
 
     fun @construct() {
-        this.colors.size() => this.numColors;
-
-        // Normalize colors to [0., 1.]
-        for (int idx; idx < colors.size(); idx++) {
-            this.colors[idx] / this.RGBMax => this.colors[idx];
+        0 => int currHue;
+        while (currHue < 360) {
+            this.hues << currHue;
+            currHue + 15 => currHue;
         }
+
+        this.hues.size() => this.numColors;
     }
 
     fun vec3 freqToColor(TuningRegister register, float freq) {
@@ -61,22 +46,14 @@ public class AudioColorMapper {
         this.getColorBounds(octaveBounds, freq) @=> ColorBounds colorBounds;
 
         // Scale color based on frequency
-        colorBounds.lowerColor.x => float redMin;
-        colorBounds.upperColor.x => float redMax;
-        Std.scalef(freq, octaveBounds.lowerFreq, octaveBounds.upperFreq, redMin, redMax) => float red;
-
-        colorBounds.lowerColor.y => float greenMin;
-        colorBounds.upperColor.y => float greenMax;
-        Std.scalef(freq, octaveBounds.lowerFreq, octaveBounds.upperFreq, greenMin, greenMax) => float green;
-
-        colorBounds.lowerColor.z => float blueMin;
-        colorBounds.upperColor.z => float blueMax;
-        Std.scalef(freq, octaveBounds.lowerFreq, octaveBounds.upperFreq, blueMin, blueMax) => float blue;
-
-        // Base intensity from Octave register
-        // octaveBounds.register + 1 => float intensity;
-        1 => float intensity;
-        @(red * intensity, green * intensity, blue * intensity) => vec3 retColor;
+        Std.scalef(
+            freq,
+            octaveBounds.lowerFreq,
+            octaveBounds.upperFreq,
+            colorBounds.lowerHue,
+            colorBounds.upperHue
+        ) => float hue;
+        Color.hsv2rgb(@(hue, 1., 1.)) => vec3 retColor;
         return retColor;
     }
 
@@ -90,9 +67,9 @@ public class AudioColorMapper {
             currFreq + freqIncrement => currFreq;
         }
 
-        this.colors[currColorIdx] => vec3 lowerColor;
-        this.colors[( currColorIdx + 1 ) % this.numColors] => vec3 upperColor;
+        this.hues[currColorIdx  % this.numColors] => int lowerHue;
+        this.hues[( currColorIdx + 1 ) % this.numColors] => int upperHue;
 
-        return new ColorBounds(lowerColor, upperColor, freqIncrement);
+        return new ColorBounds(lowerHue, upperHue, freqIncrement);
     }
 }

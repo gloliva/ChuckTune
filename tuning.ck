@@ -162,6 +162,34 @@ public class EDO extends Tuning {
         }
     }
 
+    fun float freq(int degree) {
+        0 => int octaveDiff;
+
+        // Handle negative note diff
+        if (degree < 0) {
+            this.divisions + degree => degree;
+            -1 => octaveDiff;
+        }
+
+        // Calculate Frequency
+        (degree / this.divisions) + octaveDiff => octaveDiff;
+        degree % this.divisions => degree;
+        this.freqDegrees[degree] => float freq;
+
+        // Update octave
+        if (octaveDiff < 0) {
+            repeat (Math.abs(octaveDiff)) {
+                freq / 2 => freq;
+            }
+        } else if (octaveDiff > 0) {
+            repeat (octaveDiff) {
+                freq * 2 => freq;
+            }
+        }
+
+        return freq;
+    }
+
     fun void print() {
         <<< this.divisions, "EDO", ", Step division"  >>>;
         for (int degree; degree < this.freqDegrees.size(); degree++){

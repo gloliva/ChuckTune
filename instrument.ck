@@ -66,13 +66,13 @@ public class Instrument {
         state => this.voiceState[voiceNum];
     }
 
-    fun void voiceOn(string key, int midi) {
+    fun void voiceOn(string key, float freq) {
         this.findOpenVoice() => int voiceNum;
         voiceNum => this.keyMap[key];
         state.BUSY => voiceState[voiceNum];
 
         this.voices[voiceNum] @=> Voice voice;
-        Std.mtof(midi) => voice.freq;
+        freq => voice.freq;
         voice.on();
     }
 

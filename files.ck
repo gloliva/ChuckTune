@@ -1,12 +1,17 @@
 public class TuningFile {
     string notes[0];
     int noteMapping[0];
+    int keyboardToMidi[0];
     int length;
 
-    fun void add(string note) {
+    fun void addNote(string note) {
         this.length => this.noteMapping[note];
         this.length++;
         this.notes << note;
+    }
+
+    fun void addKey(string key, int midiDiff) {
+        midiDiff => this.keyboardToMidi[key];
     }
 
     fun string get(int idx) {
@@ -39,14 +44,31 @@ public class FileReader {
             <<< "Successfully opened ", filename >>>;
         }
 
+        fio.readLine().toInt() => int numNotes;
+
         // Read each line as a word
-        while (fio.more()) {
+        repeat ( numNotes ) {
             fio.readLine().upper() => string word;
 
             // Skip commented out lines
             if (word.charAt(0) != "#".charAt(0)) {
-                set.add(word);
+                set.addNote(word);
             }
+        }
+
+        // Skip empty line
+        fio.readLine();
+
+        // Read in keyboard mappings
+        while (fio.more()) {
+            fio.readLine() => string line;
+            StringTokenizer tok;
+            tok.set(line);
+            string key, midiDiff;
+            tok.next( key );
+            tok.next( midiDiff );
+
+            set.addKey(key, Std.atoi( midiDiff ));
         }
 
         return set;

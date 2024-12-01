@@ -8,10 +8,10 @@ public class Keyboard {
     int midiBase;
 
     // Keyboard Visualizer
-    TuningFile @ tuning;
+    Tuning @ tuning;
     KeyboardVisuals visuals;
 
-    fun @construct(TuningFile tuning) {
+    fun @construct(Tuning tuning) {
         48 => this.midiBase;
         tuning @=> this.tuning;
         this.setUpKeyMapping();
@@ -19,14 +19,19 @@ public class Keyboard {
     }
 
     fun int getMidiNote(string key) {
-        return this.midiBase + this.letterToIndex[key];
+        return this.midiBase + this.tuning.file.keyboardToMidi[key];
+    }
+
+    fun float getFreq(string key) {
+        this.getNoteDiff(key) => int midiDiff;
+        return this.tuning.freq(midiDiff);
     }
 
     fun int getNoteDiff(string key) {
-        return this.letterToIndex[key];
+        return this.tuning.file.keyboardToMidi[key];
     }
 
-    fun void updateTuning(TuningFile tuning) {
+    fun void updateTuning(Tuning tuning) {
         tuning @=> this.tuning;
         this.setUpVisuals();
     }
@@ -34,17 +39,6 @@ public class Keyboard {
     fun void setUpKeyMapping() {
         // Row 1: Z - '?'
         // 10 keys
-        1 => this.letterToIndex["Z"];
-        3 => this.letterToIndex["X"];
-        5 => this.letterToIndex["C"];
-        7 => this.letterToIndex["V"];
-        9 => this.letterToIndex["B"];
-        11 => this.letterToIndex["N"];
-        13 => this.letterToIndex["M"];
-        15 => this.letterToIndex[","];
-        17 => this.letterToIndex["."];
-        19 => this.letterToIndex["/"];
-
         [
             "Z", "X", "C", "V", "B",
             "N", "M", ",", ".", "/"
@@ -52,18 +46,6 @@ public class Keyboard {
 
         // Row 2: A - '''
         // 11 keys
-        0 => this.letterToIndex["A"];
-        2 => this.letterToIndex["S"];
-        4 => this.letterToIndex["D"];
-        6 => this.letterToIndex["F"];
-        8 => this.letterToIndex["G"];
-        10 => this.letterToIndex["H"];
-        12 => this.letterToIndex["J"];
-        14 => this.letterToIndex["K"];
-        16 => this.letterToIndex["L"];
-        18 => this.letterToIndex[";"];
-        20 => this.letterToIndex["'"];
-
         [
             "A", "S", "D", "F", "G",
             "H", "J", "K", "L", ";", "'"
@@ -71,19 +53,6 @@ public class Keyboard {
 
         // Row 3: Q - ']'
         // 12 keys
-        -1 => this.letterToIndex["Q"];
-        1 => this.letterToIndex["W"];
-        3 => this.letterToIndex["E"];
-        5 => this.letterToIndex["R"];
-        7 => this.letterToIndex["T"];
-        9 => this.letterToIndex["Y"];
-        11 => this.letterToIndex["U"];
-        13 => this.letterToIndex["I"];
-        15 => this.letterToIndex["O"];
-        17 => this.letterToIndex["P"];
-        19 => this.letterToIndex["["];
-        21 => this.letterToIndex["]"];
-
         [
             "Q", "W", "E", "R", "T", "Y",
             "U", "I", "O", "P", "[", "]"
@@ -91,19 +60,6 @@ public class Keyboard {
 
         // Row 4: 1 - '='
         // 12 keys
-        -2 => this.letterToIndex["1"];
-        0 => this.letterToIndex["2"];
-        2 => this.letterToIndex["3"];
-        4 => this.letterToIndex["4"];
-        6 => this.letterToIndex["5"];
-        8 => this.letterToIndex["6"];
-        10 => this.letterToIndex["7"];
-        12 => this.letterToIndex["8"];
-        14 => this.letterToIndex["9"];
-        16 => this.letterToIndex["0"];
-        18 => this.letterToIndex["-"];
-        20 => this.letterToIndex["="];
-
         [
             "1", "2", "3", "4", "5", "6",
             "7", "8", "9", "0", "-", "="
@@ -113,8 +69,8 @@ public class Keyboard {
     fun void setUpVisuals() {
         for (int row; row < this.keyboardLayout.size(); row++) {
             for (string key : this.keyboardLayout[row]) {
-                this.letterToIndex[key] => int idx;
-                this.tuning.get(idx) => string note;
+                this.tuning.file.keyboardToMidi[key] => int idx;
+                this.tuning.file.get(idx) => string note;
                 this.visuals.set(row, note, key);
             }
         }
@@ -123,7 +79,6 @@ public class Keyboard {
 
 
 public class KeyboardKey extends GGen {
-    // GPlane border;
     GCube border;
     GPlane inside;
     GText noteLetter;
