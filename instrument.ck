@@ -12,6 +12,7 @@ public class VoiceState {
 public class VoiceSelect {
     Osc oscVoices[];
     FM fmVoices[];
+    float fmGains[];
     Gain gains[];
     Gain mix;
 
@@ -29,6 +30,30 @@ public class VoiceSelect {
         ] @=> this.oscVoices;
 
         [
+            new FMVoices(),
+            new KrstlChr(),
+            new FrencHrn(),
+            new PercFlut(),
+            new HnkyTonk(),
+            new BeeThree(),
+        ] @=> this.fmVoices;
+
+        [
+            1.2,
+            2.2,
+            1.8,
+            4.,
+            3.,
+            3.
+        ] @=> this.fmGains;
+
+        [
+            new Gain(0.),
+            new Gain(0.),
+            new Gain(0.),
+            new Gain(0.),
+            new Gain(0.),
+            new Gain(0.),
             new Gain(0.),
             new Gain(0.),
             new Gain(0.),
@@ -40,16 +65,27 @@ public class VoiceSelect {
             "TriOsc",
             "SawOsc",
             "SqrOsc",
+            "Voices",
+            "Choir",
+            "Horn",
+            "Flute",
+            "HT Piano",
+            "Hammond",
 
         ] @=> this.names;
 
-        this.oscVoices.size() => this.numVoices;
+        this.oscVoices.size() + this.fmVoices.size() => this.numVoices;
         0 => currVoice;
         1. => this.mix.gain;
 
         // Hook up to Mix
         for (int idx; idx < this.oscVoices.size(); idx++) {
             this.oscVoices[idx] => this.gains[idx] => this.mix;
+        }
+
+        for (int idx; idx < this.fmVoices.size(); idx++) {
+            this.fmVoices[idx] => this.gains[idx + this.oscVoices.size()] => this.mix;
+            this.fmVoices[idx].noteOn(this.fmGains[idx]);
         }
     }
 
@@ -78,6 +114,10 @@ public class VoiceSelect {
     fun void freq(float f) {
         for (Osc osc : this.oscVoices) {
             f => osc.freq;
+        }
+
+        for (FM fm : this.fmVoices) {
+            f => fm.freq;
         }
     }
 
