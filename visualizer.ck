@@ -43,6 +43,9 @@ public class ColorVisualizer extends GGen {
     0.01 => float xScaleFactor;
     2. => float yScaleFactor;
 
+    // Border
+    GCube border;
+
     // Color Panes
     ColorPane panesMap[0];
     ColorPane activePanes[0];
@@ -87,6 +90,12 @@ public class ColorVisualizer extends GGen {
             "Shard" + idx => shard.name;
             shard --> this;
         }
+
+        // Border
+        @(10.1, yScaleFactor + 0.1, 0.2) => this.border.sca;
+        -0.101 => this.border.posZ;
+        Color.WHITE * 3. => this.border.color;
+        this.border --> this;
 
         1.0 => this.scaX;
         this --> GG.scene();

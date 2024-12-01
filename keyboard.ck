@@ -233,9 +233,6 @@ public class KeyboardVisuals extends GGen {
             // Scale row
             @(0.6, 0.6, 0.6) => row.sca;
 
-            // Rotate
-            -0.8 => this.rotX;
-
             // Set positions
             row.setPosX(xPos[idx]);
             row.setPosY(yPos[idx]);
@@ -246,6 +243,12 @@ public class KeyboardVisuals extends GGen {
             // Connections
             row --> this;
         }
+
+        // Rotate
+        -0.8 => this.rotX;
+
+        // Move
+        0.3 => this.posX;
 
         // Names
         "Keyboard Visualizer" => this.name;

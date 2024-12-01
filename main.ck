@@ -2,7 +2,9 @@
 
     TODO: IDEAS
     - Freeze Current band to compare to a different tuning (persists across tunings)
+        - Instant Hold + Timed Hold
     - Show band from different tuning at same time as current band
+    - Change Instrument Sound
 
 */
 
@@ -50,7 +52,6 @@ EDO EDO19(file19Edo, 130.81, 19);
 Pythagorean PY(filePy, 130.81);
 Meantone MEANTONE(fileMeantone, 130.81);
 
-
 [
     EDO12,
     PY,
@@ -78,32 +79,50 @@ MousePoller mp;
 
 // UI
 TuningSelect tuningUI;
+SoundSelect soundUI;
 
 // Node Test
-Node node("A#", Color.BLUE);
+// Node node("A#", Color.BLUE);
 
 
 while (true) {
     kp.getKeyPress() @=> Key keysDown[];
     mp.getMouseInfo() @=> MouseInfo mouseInfo;
 
-    // Update tuning
-    if (mouseInfo.leftDown == 1) {
-        tuningUI.checkIfSelected(mouseInfo.pos) => int selectMode;
+    <<< "Mouse Pos", mouseInfo.pos >>>;
 
-        if (selectMode != 0) {
-            tuningManager.changeTuning(selectMode);
+    // Handle Mouse Clicks
+    if (mouseInfo.leftDown == 1) {
+        // Update tuning
+        tuningUI.checkIfSelected(mouseInfo.pos) => int tuningSelectMode;
+
+        if (tuningSelectMode != 0) {
+            tuningManager.changeTuning(tuningSelectMode);
             kb.updateTuning(tuningManager.getTuning());
             tuningUI.setText(tuningManager.getTuning().name);
         }
 
-        if (selectMode == -1) tuningUI.clickLeft();
-        if (selectMode == 1) tuningUI.clickRight();
+        if (tuningSelectMode == -1) tuningUI.clickLeft();
+        if (tuningSelectMode == 1) tuningUI.clickRight();
+
+        // Update instrument
+        soundUI.checkIfSelected(mouseInfo.pos) => int instrumentSelectMode;
+
+        if (instrumentSelectMode != 0) {
+            inst.changeVoiceInstrument(instrumentSelectMode);
+            soundUI.setText(inst.getVoiceName());
+        }
+
+        if (instrumentSelectMode == -1) soundUI.clickLeft();
+        if (instrumentSelectMode == 1) soundUI.clickRight();
     }
 
     if (mouseInfo.leftUp == 1) {
         if (tuningUI.leftButtonPressed == 1) tuningUI.resetLeft();
         if (tuningUI.rightButtonPressed == 1) tuningUI.resetRight();
+
+        if (soundUI.leftButtonPressed == 1) soundUI.resetLeft();
+        if (soundUI.rightButtonPressed == 1) soundUI.resetRight();
     }
 
     // Handle Key presses
