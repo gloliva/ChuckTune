@@ -1,3 +1,52 @@
+public class Title extends GGen {
+    GCube border;
+    GPlane inside;
+    GText titleTop;
+    GText titleBot;
+
+    fun @construct() {
+        // Scaling
+        @(1.5, 1.5, 0.05) => this.border.sca;
+        @(1.4, 1.4, 0.9) => this.inside.sca;
+        @(0.4, 0.4, 0.4) => this.titleTop.sca;
+        @(0.5, 0.4, 0.4) => this.titleBot.sca;
+
+        // Position
+        -0.025 => this.border.posZ;
+        0.001 => this.inside.posZ;
+
+        @(0, 0.2, 0.01) => this.titleTop.pos;
+        @(0, -0.2, 0.01) => this.titleBot.pos;
+
+        @(-5.12, 2.57, 0.) => this.pos;
+
+        // Color
+        Color.WHITE * 2. => this.border.color;
+        Color.BLACK => this.inside.color;
+        @(2., 2., 2., 1.) => this.titleTop.color;
+        @(2., 2., 2., 1.) => this.titleBot.color;
+
+        // Text
+        "ChucK" => this.titleTop.text;
+        "TUNE" => this.titleBot.text;
+
+        // Names
+        "Border" => this.border.name;
+        "Inside" => this.inside.name;
+        "Title Top" => this.titleTop.name;
+        "Title Bot" => this.titleBot.name;
+        "Title" => this.name;
+
+        // Connection
+        border --> this;
+        inside --> this;
+        titleTop --> this;
+        titleBot --> this;
+        this --> GG.scene();
+    }
+}
+
+
 public class TuningSelect extends GGen {
     GCube border;
     GPlane inside;

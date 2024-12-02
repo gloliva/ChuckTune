@@ -146,6 +146,12 @@ public class ColorVisualizer extends GGen {
         z => this.posZ;
     }
 
+    fun void setScale(float x, float y, float z) {
+        x => this.scaX;
+        y => this.scaY;
+        z => this.scaZ;
+    }
+
     fun void addPane(string key, vec3 color, int noteDiff) {
         Std.scalef(noteDiff, -2, 2 * this.steps, 100., this.shards.size() - 100)$int => int idx;
         ColorPane pane(color, noteDiff, idx, 100, this.shards.size());

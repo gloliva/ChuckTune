@@ -32,7 +32,7 @@ mainCam.posZ(8.0);
 Color.BLACK => GG.scene().backgroundColor;
 
 // Bloom
-Bloom bloom(1.5, 0.75);
+Bloom bloom(2., 0.75);
 bloom.radius(1.0);
 bloom.levels(4);
 
@@ -69,8 +69,13 @@ Instrument inst(state);
 
 // Visuals
 AudioColorMapper colorMapper;
-ColorVisualizer visualizer(tuningManager.getTuning());
-visualizer.setPos(0., 1.5, 0.);
+ColorVisualizer primaryVisualizer(tuningManager.getTuning());
+primaryVisualizer.setPos(0.4, 0.4, 0.);
+primaryVisualizer.setScale(0.9, 0.8, 1.);
+
+ColorVisualizer secondaryVisualizer(tuningManager.getTuning());
+secondaryVisualizer.setPos(0.4, 2.05, 0.);
+secondaryVisualizer.setScale(0.9, 0.8, 1.);
 
 // Keyboard and Mouse Input
 KeyPoller kp;
@@ -78,6 +83,7 @@ Keyboard kb(tuningManager.getTuning());
 MousePoller mp;
 
 // UI
+Title title;
 TuningSelect tuningUI;
 SoundSelect soundUI;
 
@@ -135,7 +141,8 @@ while (true) {
         kb.visuals.pressKey(key.keyRow, key.keyCol);
 
         kb.getNoteDiff(key.key) => int noteDiff;
-        visualizer.addPane(key.key, keyColor, noteDiff);
+        primaryVisualizer.addPane(key.key, keyColor, noteDiff);
+        secondaryVisualizer.addPane(key.key, keyColor, noteDiff);
     }
 
 
@@ -144,10 +151,12 @@ while (true) {
         inst.voiceOff(key.key);
         kb.visuals.setKeyColor(Color.BLACK, Color.WHITE * 2., key.keyRow, key.keyCol);
         kb.visuals.releaseKey(key.keyRow, key.keyCol);
-        visualizer.removePane(key.key);
+        primaryVisualizer.removePane(key.key);
+        secondaryVisualizer.removePane(key.key);
     }
 
-    visualizer.update();
+    primaryVisualizer.update();
+    secondaryVisualizer.update();
 
     GG.nextFrame() => now;
     // UI
