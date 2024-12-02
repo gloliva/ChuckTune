@@ -12,6 +12,7 @@ TODO:
 
 */
 
+@import "background.ck"
 @import "ui.ck"
 
 
@@ -51,7 +52,7 @@ public class ColorVisualizer extends GGen {
     int hold;
 
     // Border
-    GCube border;
+    Frame frame;
 
     // Color Panes
     ColorPane panesMap[0];
@@ -116,13 +117,8 @@ public class ColorVisualizer extends GGen {
             shard --> this;
         }
 
-        // Border
-        @(10.1, yScaleFactor + 0.1, 0.2) => this.border.sca;
-        -0.101 => this.border.posZ;
-        Color.WHITE * 3. => this.border.color;
-        this.border --> this;
-
         1.0 => this.scaX;
+        frame --> this;
         this --> GG.scene();
         "ColorVisualizer" => this.name;
     }

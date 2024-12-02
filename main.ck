@@ -8,6 +8,7 @@
 
 */
 
+@import "background.ck"
 @import "bloom.ck"
 @import "color.ck"
 @import "input.ck"
@@ -30,6 +31,10 @@ mainCam.posZ(8.0);
 
 // Background
 Color.BLACK => GG.scene().backgroundColor;
+Blocker blockLeft(@(-5.03, 0.), @(2., 7.));
+Blocker blockRight(@(6.22, 0.), @(2., 7.));
+Blocker blockTop(@(0., 3.38), @(10.5, 1.));
+Blocker blockBottom(@(0., -1.94), @(10.5, 3.));
 
 // Bloom
 Bloom bloom(2., 0.75);
@@ -70,11 +75,11 @@ Instrument inst(state);
 // Visuals
 AudioColorMapper colorMapper;
 ColorVisualizer primaryVisualizer(tuningManager.getTuning());
-primaryVisualizer.setPos(0.6, 0.4, 0.);
+primaryVisualizer.setPos(0.6, 0.4, -0.05);
 primaryVisualizer.setScale(0.92, 0.8, 1.);
 
 ColorVisualizer secondaryVisualizer(tuningManager.getTuning());
-secondaryVisualizer.setPos(0.6, 2.05, 0.);
+secondaryVisualizer.setPos(0.6, 2.05, -0.05);
 secondaryVisualizer.setScale(0.92, 0.8, 1.);
 
 // Keyboard and Mouse Input
@@ -133,6 +138,8 @@ while (true) {
 
         if (blendSelectMode == -1) blendUI.clickLeft();
         if (blendSelectMode == 1) blendUI.clickRight();
+
+        // Scale and position handling
 
         // Hold visualizer
         holdUI.checkIfSelected(mouseInfo.pos) => int holdSelectMode;
