@@ -179,7 +179,7 @@ public class ColorVisualizer extends GGen {
         // Skip if in hold mode
         if (this.hold == 1) return;
 
-        ColorPane pane(color, noteDiff, shardCenter, 100, this.shards.size());
+        ColorPane pane(color, noteDiff, shardCenter, 125, this.shards.size());
         this.addPaneToActiveList(pane);
 
         pane @=> this.panesMap[key];
@@ -233,14 +233,14 @@ public class ColorVisualizer extends GGen {
     fun void update() {
         // Update colors
 
-        if (this.activePanes.size() == 1) {
+        if (this.activePanes.size() >= 1) {
             this.activePanes[0] @=> ColorPane pane;
             this.setColor(pane.color, pane.lower, pane.upper);
         }
 
-        for (ColorPane pane : this.activePanes) {
-            this.setColor(pane.color, pane.lower, pane.upper);
-        }
+        // for (ColorPane pane : this.activePanes) {
+        //     this.setColor(pane.color, pane.lower, pane.upper);
+        // }
 
         for (1 => int idx; idx < this.activePanes.size(); idx++) {
 
@@ -259,8 +259,11 @@ public class ColorVisualizer extends GGen {
 
 
                 ((bottomPane.upper - topPane.lower) / 2)$int + topPane.lower => int midPoint;
-                this.setColorGradient(bottomPane.color, blend, topPane.lower, midPoint);
+                this.setColorGradient(bottomColor, blend, topPane.lower, midPoint);
                 this.setColorGradient(blend, topColor, midPoint, bottomPane.upper);
+                this.setColor(topPane.color, bottomPane.upper, topPane.upper);
+            } else {
+                this.setColor(topPane.color, topPane.lower, topPane.upper);
             }
         }
     }
