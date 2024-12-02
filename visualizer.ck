@@ -12,6 +12,9 @@ TODO:
 
 */
 
+@import "ui.ck"
+
+
 public class ColorPane {
     vec3 color;
     int noteDiff;
@@ -42,6 +45,7 @@ public class ColorVisualizer extends GGen {
     GPlane shards[1000];
     0.01 => float xScaleFactor;
     2. => float yScaleFactor;
+    int layerMode;
 
     // Hold Color Shards
     int hold;
@@ -57,11 +61,29 @@ public class ColorVisualizer extends GGen {
     Tuning @ tuning;
     int steps;
 
+    // Layers
+    0 => int BLOCK;
+    1 => int BLEND;
+    2 => int BLEND_SHOW_CENTER;
+
+    [
+        "Block",
+        "Blend",
+        "Blend+Center",
+    ] @=> string layersText[];
+
+    [
+        0.2,
+        0.2,
+        0.15,
+    ] @=> float layersTextScale[];
+
     fun @construct(Tuning tuning) {
         // Tuning
         tuning @=> this.tuning;
         tuning.file.length => this.steps;
         12 => this.activePanes.capacity;
+        1 => this.layerMode;
 
         // Handle shards
         (this.shards.size() / 2 )$int => int midPoint;
@@ -116,10 +138,6 @@ public class ColorVisualizer extends GGen {
         for (startIdx => int idx; idx < endIdx; idx++) {
             this.shards[idx] @=> GPlane shard;
 
-            // Std.scalef(idx, startIdx, endIdx, leftHue, rightHue) => float hue;
-
-            // Color.hsv2rgb(@(hue, 1., 1.)) => shard.color;
-
             leftColor.x => float redMin;
             rightColor.x => float redMax;
             Std.scalef(idx, startIdx, endIdx, redMin, redMax) => float red;
@@ -173,6 +191,22 @@ public class ColorVisualizer extends GGen {
         for (string key : keys) {
             this.removePane(key);
         }
+    }
+
+    fun void changeLayer(int diff) {
+        this.layerMode + diff => this.layerMode;
+
+        if (this.layerMode < 0) {
+            this.layersText.size() + this.layerMode => this.layerMode;
+        }
+
+        this.layerMode % this.layersText.size() => this.layerMode;
+    }
+
+    fun Text getLayerType() {
+        this.layersText[this.layerMode] => string text;
+        this.layersTextScale[this.layerMode] => float scale;
+        return new Text(text, scale);
     }
 
     fun void addPane(string key, vec3 color, int shardCenter, int noteDiff) {
@@ -233,37 +267,46 @@ public class ColorVisualizer extends GGen {
     fun void update() {
         // Update colors
 
-        if (this.activePanes.size() >= 1) {
-            this.activePanes[0] @=> ColorPane pane;
-            this.setColor(pane.color, pane.lower, pane.upper);
+        if (this.layerMode == this.BLOCK) {
+            for (ColorPane pane : this.activePanes) {
+                this.setColor(pane.color, pane.lower, pane.upper);
+            }
         }
 
-        // for (ColorPane pane : this.activePanes) {
-        //     this.setColor(pane.color, pane.lower, pane.upper);
-        // }
+        if (this.layerMode == this.BLEND || this.layerMode == this.BLEND_SHOW_CENTER) {
+            if (this.activePanes.size() >= 1) {
+                this.activePanes[0] @=> ColorPane pane;
+                this.setColor(pane.color, pane.lower, pane.upper);
+            }
 
-        for (1 => int idx; idx < this.activePanes.size(); idx++) {
+            for (1 => int idx; idx < this.activePanes.size(); idx++) {
 
-            this.activePanes[idx - 1] @=> ColorPane bottomPane;
-            this.activePanes[idx] @=> ColorPane topPane;
+                this.activePanes[idx - 1] @=> ColorPane bottomPane;
+                this.activePanes[idx] @=> ColorPane topPane;
 
-            Color.rgb2hsv(bottomPane.color).x => float leftHue;
-            Color.rgb2hsv(topPane.color).x => float rightHue;
+                Color.rgb2hsv(bottomPane.color).x => float leftHue;
+                Color.rgb2hsv(topPane.color).x => float rightHue;
 
-            ( (leftHue + rightHue) / 2 ) % 360 => float blendHue;
-            Color.hsv2rgb(@(blendHue, 1., 1.)) => vec3 blend;
+                ( (leftHue + rightHue) / 2 ) % 360 => float blendHue;
+                Color.hsv2rgb(@(blendHue, 1., 1.)) => vec3 blend;
 
-            if (bottomPane.upper > topPane.lower) {
-                this.shards[topPane.lower].color() => vec3 bottomColor;
-                this.shards[bottomPane.upper].color() => vec3 topColor;
+                if (bottomPane.upper > topPane.lower) {
+                    this.shards[topPane.lower].color() => vec3 bottomColor;
+                    this.shards[bottomPane.upper].color() => vec3 topColor;
 
+                    ((bottomPane.upper - topPane.lower) / 2)$int + topPane.lower => int midPoint;
+                    this.setColorGradient(bottomColor, blend, topPane.lower, midPoint);
+                    this.setColorGradient(blend, topColor, midPoint, bottomPane.upper);
+                    this.setColor(topPane.color, bottomPane.upper, topPane.upper);
+                } else {
+                    this.setColor(topPane.color, topPane.lower, topPane.upper);
+                }
+            }
+        }
 
-                ((bottomPane.upper - topPane.lower) / 2)$int + topPane.lower => int midPoint;
-                this.setColorGradient(bottomColor, blend, topPane.lower, midPoint);
-                this.setColorGradient(blend, topColor, midPoint, bottomPane.upper);
-                this.setColor(topPane.color, bottomPane.upper, topPane.upper);
-            } else {
-                this.setColor(topPane.color, topPane.lower, topPane.upper);
+        if (this.layerMode == this.BLEND_SHOW_CENTER) {
+            for (ColorPane pane : this.activePanes) {
+                this.setColor(pane.color * 3., pane.center - 2, pane.center + 2);
             }
         }
     }

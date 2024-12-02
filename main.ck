@@ -70,12 +70,12 @@ Instrument inst(state);
 // Visuals
 AudioColorMapper colorMapper;
 ColorVisualizer primaryVisualizer(tuningManager.getTuning());
-primaryVisualizer.setPos(0.4, 0.4, 0.);
-primaryVisualizer.setScale(0.9, 0.8, 1.);
+primaryVisualizer.setPos(0.6, 0.4, 0.);
+primaryVisualizer.setScale(0.92, 0.8, 1.);
 
 ColorVisualizer secondaryVisualizer(tuningManager.getTuning());
-secondaryVisualizer.setPos(0.4, 2.05, 0.);
-secondaryVisualizer.setScale(0.9, 0.8, 1.);
+secondaryVisualizer.setPos(0.6, 2.05, 0.);
+secondaryVisualizer.setScale(0.92, 0.8, 1.);
 
 // Keyboard and Mouse Input
 KeyPoller kp;
@@ -87,6 +87,7 @@ Title title;
 TuningSelect tuningUI;
 SoundSelect soundUI;
 HoldVisualizer holdUI;
+BlendSelect blendUI;
 
 
 while (true) {
@@ -120,6 +121,19 @@ while (true) {
         if (instrumentSelectMode == -1) soundUI.clickLeft();
         if (instrumentSelectMode == 1) soundUI.clickRight();
 
+        // Blend mode
+        blendUI.checkIfSelected(mouseInfo.pos) => int blendSelectMode;
+
+        if (blendSelectMode != 0) {
+            primaryVisualizer.changeLayer(blendSelectMode);
+            secondaryVisualizer.changeLayer(blendSelectMode);
+            primaryVisualizer.getLayerType() @=> Text blendText;
+            blendUI.setText(blendText.text, blendText.scale);
+        }
+
+        if (blendSelectMode == -1) blendUI.clickLeft();
+        if (blendSelectMode == 1) blendUI.clickRight();
+
         // Hold visualizer
         holdUI.checkIfSelected(mouseInfo.pos) => int holdSelectMode;
 
@@ -139,6 +153,9 @@ while (true) {
 
         if (soundUI.leftButtonPressed == 1) soundUI.resetLeft();
         if (soundUI.rightButtonPressed == 1) soundUI.resetRight();
+
+        if (blendUI.leftButtonPressed == 1) blendUI.resetLeft();
+        if (blendUI.rightButtonPressed == 1) blendUI.resetRight();
     }
 
     // Handle Key presses
