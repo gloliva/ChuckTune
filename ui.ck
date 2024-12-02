@@ -168,7 +168,7 @@ public class TuningSelect extends GGen {
         0 => int selectMode;
         if (mousePos.y >= 534 && mousePos.y <= 584) {
             if (mousePos.x >= 75 && mousePos.x <= 125) -1 => selectMode;
-            if (mousePos.x >= 205 && mousePos.x <= 2255) 1 => selectMode;
+            if (mousePos.x >= 205 && mousePos.x <= 255) 1 => selectMode;
         }
 
         return selectMode;
@@ -256,7 +256,7 @@ public class SoundSelect extends GGen {
         @(0.3, -0.25, 0) => this.rsBorder.pos;
         0.501 => this.rsInside.posZ;
 
-        @(-5.12, -1.85, 0.) => this.pos;
+        @(-5.12, -2.8, 0.) => this.pos;
 
         // Text
         "SinOsc" => this.instrument.text;
@@ -312,9 +312,10 @@ public class SoundSelect extends GGen {
 
     fun int checkIfSelected(vec2 mousePos) {
         0 => int selectMode;
-        if (mousePos.y >= 1155 && mousePos.y <= 1205) {
+
+        if (mousePos.y >= 1362 && mousePos.y <= 1412) {
             if (mousePos.x >= 75 && mousePos.x <= 125) -1 => selectMode;
-            if (mousePos.x >= 205 && mousePos.x <= 2255) 1 => selectMode;
+            if (mousePos.x >= 205 && mousePos.x <= 255) 1 => selectMode;
         }
 
         return selectMode;
@@ -726,7 +727,7 @@ public class BlendSelect extends GGen {
         0 => int selectMode;
         if (mousePos.y >= 742 && mousePos.y <= 790) {
             if (mousePos.x >= 75 && mousePos.x <= 125) -1 => selectMode;
-            if (mousePos.x >= 205 && mousePos.x <= 2255) 1 => selectMode;
+            if (mousePos.x >= 205 && mousePos.x <= 255) 1 => selectMode;
         }
 
         return selectMode;
@@ -767,7 +768,7 @@ public class BlendSelect extends GGen {
 }
 
 
-public class ScaleVisualizer extends GGen {
+public class MoveVisualizer extends GGen {
     GCube border;
     GPlane inside;
 
@@ -779,12 +780,24 @@ public class ScaleVisualizer extends GGen {
     GCube rsBorder;
     GPlane rsInside;
 
-    GText tuning;
-    GCube tBorder;
-    GPlane tInside;
+    GText plusSelect;
+    GCube plusBorder;
+    GPlane plusInside;
+
+    GText minusSelect;
+    GCube minusBorder;
+    GPlane minusInside;
 
     int leftButtonPressed;
     int rightButtonPressed;
+    int plusButtonPressed;
+    int minusButtonPressed;
+
+    // Modes
+    1 => int LEFT;
+    2 => int RIGHT;
+    3 => int PLUS;
+    4 => int MINUS;
 
     fun @construct() {
         // Scaling
@@ -799,17 +812,17 @@ public class ScaleVisualizer extends GGen {
         @(0.25, 0.25, 0.05) => this.rsBorder.sca;
         @(0.9, 0.9, 0.9) => this.rsInside.sca;
 
-        @(0.2, 0.2, 0.2) => this.tuning.sca;
-        @(1.2, 0.35, 0.05) => this.tBorder.sca;
-        @(0.98, 0.9, 0.9) => this.tInside.sca;
+        @(0.2, 0.2, 0.2) => this.plusSelect.sca;
+        @(0.25, 0.25, 0.05) => this.plusBorder.sca;
+        @(0.9, 0.9, 0.9) => this.plusInside.sca;
+
+        @(0.2, 0.2, 0.2) => this.minusSelect.sca;
+        @(0.25, 0.25, 0.05) => this.minusBorder.sca;
+        @(0.9, 0.9, 0.9) => this.minusInside.sca;
 
         // Position
         -0.025 => this.border.posZ;
         0.001 => this.inside.posZ;
-
-        @(0, 0.15, 0.0251) => this.tuning.pos;
-        @(0, 0.15, 0) => this.tBorder.pos;
-        0.501 => this.tInside.posZ;
 
         @(-0.3, -0.25, 0.0251) => this.leftSelect.pos;
         @(-0.3, -0.25, 0) => this.lsBorder.pos;
@@ -819,10 +832,20 @@ public class ScaleVisualizer extends GGen {
         @(0.3, -0.25, 0) => this.rsBorder.pos;
         0.501 => this.rsInside.posZ;
 
-        @(-5.12, 1.0, 0.) => this.pos;
+        @(-0.3, 0.25, 0.0251) => this.plusSelect.pos;
+        @(-0.3, 0.25, 0) => this.plusBorder.pos;
+        0.501 => this.plusInside.posZ;
+
+        @(0.3, 0.25, 0.0251) => this.minusSelect.pos;
+        @(0.3, 0.25, 0) => this.minusBorder.pos;
+        0.501 => this.minusInside.posZ;
+
+
+        @(-5.12, -1.85, 0.) => this.pos;
 
         // Text
-        "12 EDO" => this.tuning.text;
+        "+" => this.plusSelect.text;
+        "-" => this.minusSelect.text;
         "<" => this.leftSelect.text;
         ">" => this.rightSelect.text;
 
@@ -830,14 +853,14 @@ public class ScaleVisualizer extends GGen {
         Color.WHITE * 2. => this.border.color;
         Color.WHITE * 2. => this.lsBorder.color;
         Color.WHITE * 2. => this.rsBorder.color;
-        Color.WHITE * 2. => this.tBorder.color;
+        Color.WHITE * 2. => this.plusBorder.color;
+        Color.WHITE * 2. => this.minusBorder.color;
 
         Color.BLACK => this.inside.color;
         Color.BLACK => this.lsInside.color;
         Color.BLACK => this.rsInside.color;
-        Color.BLACK => this.tInside.color;
-
-        @(2., 2., 2., 1.) => this.tuning.color;
+        Color.BLACK => this.plusInside.color;
+        Color.BLACK => this.minusInside.color;
 
         // Name
         "Border" => this.border.name;
@@ -851,11 +874,15 @@ public class ScaleVisualizer extends GGen {
         "RS Border" => this.rsBorder.name;
         "RS Inside" => this.rsInside.name;
 
-        "Selected Tuning" => this.tuning.name;
-        "T Border" => this.tBorder.name;
-        "T Inside" => this.tInside.name;
+        "Plus Select" => this.plusSelect.name;
+        "Plus Border" => this.plusBorder.name;
+        "Plus Inside" => this.plusInside.name;
 
-        "Tuning UI" => this.name;
+        "Minus Select" => this.minusSelect.name;
+        "Minus Border" => this.minusBorder.name;
+        "Minus Inside" => this.minusInside.name;
+
+        "Move UI" => this.name;
 
         // Connection
         border --> this;
@@ -867,17 +894,26 @@ public class ScaleVisualizer extends GGen {
         rightSelect --> this;
         rsInside --> rsBorder --> this;
 
-        tuning --> this;
-        tInside --> tBorder --> this;
+        plusSelect --> this;
+        plusInside --> plusBorder --> this;
+
+        minusSelect --> this;
+        minusInside --> minusBorder --> this;
 
         this --> GG.scene();
     }
 
     fun int checkIfSelected(vec2 mousePos) {
         0 => int selectMode;
-        if (mousePos.y >= 534 && mousePos.y <= 584) {
-            if (mousePos.x >= 75 && mousePos.x <= 125) -1 => selectMode;
-            if (mousePos.x >= 205 && mousePos.x <= 2255) 1 => selectMode;
+
+        if (mousePos.y >= 1046 && mousePos.y <= 1096) {
+            if (mousePos.x >= 75 && mousePos.x <= 125) this.PLUS => selectMode;
+            if (mousePos.x >= 205 && mousePos.x <= 255) this.MINUS => selectMode;
+        }
+
+        if (mousePos.y >= 1155 && mousePos.y <= 1205) {
+            if (mousePos.x >= 75 && mousePos.x <= 125) this.LEFT => selectMode;
+            if (mousePos.x >= 205 && mousePos.x <= 255) this.RIGHT => selectMode;
         }
 
         return selectMode;
@@ -907,7 +943,27 @@ public class ScaleVisualizer extends GGen {
         this.rightSelect.posZ() + 0.02 => this.rightSelect.posZ;
     }
 
-    fun void setText(string text) {
-        text => this.tuning.text;
+    fun void clickPlus() {
+        1 => this.plusButtonPressed;
+        this.plusBorder.posZ() - 0.02 => this.plusBorder.posZ;
+        this.plusSelect.posZ() - 0.02 => this.plusSelect.posZ;
+    }
+
+    fun void resetPlus() {
+        0 => this.plusButtonPressed;
+        this.plusBorder.posZ() + 0.02 => this.plusBorder.posZ;
+        this.plusSelect.posZ() + 0.02 => this.plusSelect.posZ;
+    }
+
+    fun void clickMinus() {
+        1 => this.minusButtonPressed;
+        this.minusBorder.posZ() - 0.02 => this.minusBorder.posZ;
+        this.minusSelect.posZ() - 0.02 => this.minusSelect.posZ;
+    }
+
+    fun void resetMinus() {
+        0 => this.minusButtonPressed;
+        this.minusBorder.posZ() + 0.02 => this.minusBorder.posZ;
+        this.minusSelect.posZ() + 0.02 => this.minusSelect.posZ;
     }
 }

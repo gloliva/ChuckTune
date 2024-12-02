@@ -36,6 +36,9 @@ Blocker blockRight(@(6.22, 0.), @(2., 7.));
 Blocker blockTop(@(0., 3.38), @(10.5, 1.));
 Blocker blockBottom(@(0., -1.94), @(10.5, 3.));
 
+Frame topFrame(1.5, 1.36, -0.28);
+Frame bottomFrame(-0.12, 1.34, -0.29);
+
 // Bloom
 Bloom bloom(2., 0.75);
 bloom.radius(1.0);
@@ -93,13 +96,12 @@ TuningSelect tuningUI;
 SoundSelect soundUI;
 HoldVisualizer holdUI;
 BlendSelect blendUI;
+MoveVisualizer moveUI;
 
 
 while (true) {
     kp.getKeyPress() @=> Key keysDown[];
     mp.getMouseInfo() @=> MouseInfo mouseInfo;
-
-    <<< "Mouse Pos", mouseInfo.pos >>>;
 
     // Handle Mouse Clicks
     if (mouseInfo.leftDown == 1) {
@@ -140,6 +142,12 @@ while (true) {
         if (blendSelectMode == 1) blendUI.clickRight();
 
         // Scale and position handling
+        moveUI.checkIfSelected(mouseInfo.pos) => int moveSelectMode;
+
+        if (moveSelectMode == moveUI.LEFT) moveUI.clickLeft();
+        if (moveSelectMode == moveUI.RIGHT) moveUI.clickRight();
+        if (moveSelectMode == moveUI.PLUS) moveUI.clickPlus();
+        if (moveSelectMode == moveUI.MINUS) moveUI.clickMinus();
 
         // Hold visualizer
         holdUI.checkIfSelected(mouseInfo.pos) => int holdSelectMode;
@@ -154,6 +162,23 @@ while (true) {
         }
     }
 
+    if (mouseInfo.leftHeld == 1) {
+        // Scale and position handling
+        if (moveUI.leftButtonPressed == 1) {
+            primaryVisualizer.translate(-0.05);
+            secondaryVisualizer.translate(-0.05);
+        } else if (moveUI.rightButtonPressed == 1) {
+            primaryVisualizer.translate(0.05);
+            secondaryVisualizer.translate(0.05);
+        } else if (moveUI.plusButtonPressed == 1) {
+            primaryVisualizer.scaleWidth(0.05);
+            secondaryVisualizer.scaleWidth(0.05);
+        } else if (moveUI.minusButtonPressed == 1) {
+            primaryVisualizer.scaleWidth(-0.05);
+            secondaryVisualizer.scaleWidth(-0.05);
+        }
+    }
+
     if (mouseInfo.leftUp == 1) {
         if (tuningUI.leftButtonPressed == 1) tuningUI.resetLeft();
         if (tuningUI.rightButtonPressed == 1) tuningUI.resetRight();
@@ -163,6 +188,11 @@ while (true) {
 
         if (blendUI.leftButtonPressed == 1) blendUI.resetLeft();
         if (blendUI.rightButtonPressed == 1) blendUI.resetRight();
+
+        if (moveUI.leftButtonPressed == 1) moveUI.resetLeft();
+        if (moveUI.rightButtonPressed == 1) moveUI.resetRight();
+        if (moveUI.plusButtonPressed == 1) moveUI.resetPlus();
+        if (moveUI.minusButtonPressed == 1) moveUI.resetMinus();
     }
 
     // Handle Key presses

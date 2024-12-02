@@ -4,18 +4,21 @@ public class Frame extends GGen {
     GCube leftEdge;
     GCube rightEdge;
 
-    fun @construct() {
+    fun @construct(float shiftY, float topEdgeY, float bottomEdgeY) {
         // Position
-        @(0, 1.03, 0.0) => this.topEdge.pos;
-        @(0, -1.03, 0.0) => this.bottomEdge.pos;
-        @(-5.05, 0., 0.0) => this.leftEdge.pos;
-        @(5.05, 0., 0.0) => this.rightEdge.pos;
+        @(0.2, topEdgeY, 0.0) => this.topEdge.pos;
+        @(0.2, bottomEdgeY, 0.0) => this.bottomEdge.pos;
+        @(-4.02, 0.54, 0.0) => this.leftEdge.pos;
+        @(5.22, 0.51, 0.0) => this.rightEdge.pos;
+
+        shiftY => this.posY;
+        -0.02 => this.posZ;
 
         // Scale
         @(10.1, 0.06, 0.01) => this.topEdge.sca;
         @(10.1, 0.06, 0.01) => this.bottomEdge.sca;
-        @(0.1, 2., 0.01) => this.leftEdge.sca;
-        @(0.1, 2., 0.01) => this.rightEdge.sca;
+        @(0.1, 1.65, 0.01) => this.leftEdge.sca;
+        @(0.1, 1.65, 0.01) => this.rightEdge.sca;
 
         // Color
         Color.WHITE * 3. => this.topEdge.color;
@@ -35,6 +38,7 @@ public class Frame extends GGen {
         bottomEdge --> this;
         leftEdge --> this;
         rightEdge --> this;
+        this --> GG.scene();
     }
 }
 

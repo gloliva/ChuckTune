@@ -51,9 +51,6 @@ public class ColorVisualizer extends GGen {
     // Hold Color Shards
     int hold;
 
-    // Border
-    Frame frame;
-
     // Color Panes
     ColorPane panesMap[0];
     ColorPane activePanes[0];
@@ -118,7 +115,6 @@ public class ColorVisualizer extends GGen {
         }
 
         1.0 => this.scaX;
-        frame --> this;
         this --> GG.scene();
         "ColorVisualizer" => this.name;
     }
@@ -167,6 +163,14 @@ public class ColorVisualizer extends GGen {
         x => this.scaX;
         y => this.scaY;
         z => this.scaZ;
+    }
+
+    fun void scaleWidth(float diff) {
+        this.scaX() + diff => this.scaX;
+    }
+
+    fun void translate(float diff) {
+        diff => this.translateX;
     }
 
     fun void setHold() {
