@@ -205,7 +205,6 @@ while (true) {
         kb.visuals.pressKey(key.keyRow, key.keyCol);
 
         colorMapper.freqToShard( register, freq ) => int shardCenter;
-        <<< "Key", key.key, "Shard Center", shardCenter >>>;
         kb.getNoteDiff(key.key) => int noteDiff;
         primaryVisualizer.addPane(key.key, keyColor, shardCenter, noteDiff);
         secondaryVisualizer.addPane(key.key, keyColor, shardCenter, noteDiff);
@@ -226,9 +225,9 @@ while (true) {
 
     GG.nextFrame() => now;
     // UI
-    if (UI.begin("ChuckTune")) {
-        // show a UI display of the current scenegraph
-        UI.scenegraph(GG.scene());
-    }
-    UI.end();
+    // if (UI.begin("ChuckTune")) {
+    //     // show a UI display of the current scenegraph
+    //     UI.scenegraph(GG.scene());
+    // }
+    // UI.end();
 }

@@ -39,8 +39,6 @@ public class AudioColorMapper {
         }
 
         [
-            -500,
-            -250,
             0,
             250,
             500,
@@ -49,7 +47,9 @@ public class AudioColorMapper {
             1250,
             1500,
             1750,
-            2000
+            2000,
+            2250,
+            2500,
         ] @=> this.registerToShardIdx;
 
         this.hues.size() => this.numColors;

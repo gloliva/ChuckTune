@@ -43,7 +43,7 @@ public class ColorPane {
 
 public class ColorVisualizer extends GGen {
     // Visual Color Shards
-    GPlane shards[1000];
+    GPlane shards[2000];
     0.01 => float xScaleFactor;
     2. => float yScaleFactor;
     int layerMode;
