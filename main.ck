@@ -4,7 +4,7 @@
     - Freeze Current band to compare to a different tuning (persists across tunings)
         - Instant Hold + Timed Hold
     - Show band from different tuning at same time as current band
-    - Change Instrument Sound
+    - Zoom in and out of bands (and scroll)
 
 */
 
@@ -86,13 +86,14 @@ MousePoller mp;
 Title title;
 TuningSelect tuningUI;
 SoundSelect soundUI;
+HoldVisualizer holdUI;
 
 
 while (true) {
     kp.getKeyPress() @=> Key keysDown[];
     mp.getMouseInfo() @=> MouseInfo mouseInfo;
 
-    // <<< "Mouse Pos", mouseInfo.pos >>>;
+    <<< "Mouse Pos", mouseInfo.pos >>>;
 
     // Handle Mouse Clicks
     if (mouseInfo.leftDown == 1) {
@@ -118,6 +119,15 @@ while (true) {
 
         if (instrumentSelectMode == -1) soundUI.clickLeft();
         if (instrumentSelectMode == 1) soundUI.clickRight();
+
+        // Hold visualizer
+        holdUI.checkIfSelected(mouseInfo.pos) => int holdSelectMode;
+
+        if (holdSelectMode == holdUI.HOLD_PRESS) {
+            holdUI.toggleHold();
+            if (holdUI.holdPressed == 1) secondaryVisualizer.setHold();
+            if (holdUI.holdPressed == 0) secondaryVisualizer.releaseHold();
+        }
     }
 
     if (mouseInfo.leftUp == 1) {

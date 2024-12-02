@@ -43,6 +43,9 @@ public class ColorVisualizer extends GGen {
     0.01 => float xScaleFactor;
     2. => float yScaleFactor;
 
+    // Hold Color Shards
+    int hold;
+
     // Border
     GCube border;
 
@@ -152,7 +155,30 @@ public class ColorVisualizer extends GGen {
         z => this.scaZ;
     }
 
+    fun void setHold() {
+        1 => this.hold;
+    }
+
+    fun void setHold(dur wait) {
+        wait => now;
+        1 => this.hold;
+    }
+
+    fun void releaseHold() {
+        0 => this.hold;
+
+        string keys[0];
+        this.panesMap.getKeys(keys);
+
+        for (string key : keys) {
+            this.removePane(key);
+        }
+    }
+
     fun void addPane(string key, vec3 color, int shardCenter, int noteDiff) {
+        // Skip if in hold mode
+        if (this.hold == 1) return;
+
         ColorPane pane(color, noteDiff, shardCenter, 100, this.shards.size());
         this.addPaneToActiveList(pane);
 
@@ -160,6 +186,9 @@ public class ColorVisualizer extends GGen {
     }
 
     fun void removePane(string key) {
+        // Skip if in hold mode
+        if (this.hold == 1) return;
+
         this.panesMap[key] @=> ColorPane pane;
         this.setColor(Color.BLACK, pane.lower, pane.upper);
         this.removePaneToActiveList(pane);
