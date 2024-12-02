@@ -125,8 +125,11 @@ while (true) {
 
         if (holdSelectMode == holdUI.HOLD_PRESS) {
             holdUI.toggleHold();
-            if (holdUI.holdPressed == 1) secondaryVisualizer.setHold();
+            if (holdUI.holdPressed == 1) spork ~ secondaryVisualizer.setHold(holdUI.waitTime);
             if (holdUI.holdPressed == 0) secondaryVisualizer.releaseHold();
+        } else if (holdSelectMode != 0 && holdSelectMode != holdUI.HOLD_PRESS) {
+            holdUI.resetTime();
+            holdUI.updateTime(holdSelectMode);
         }
     }
 

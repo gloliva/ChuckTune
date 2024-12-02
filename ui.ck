@@ -359,9 +359,10 @@ public class HoldVisualizer extends GGen {
     GCube holdBorder;
     GPlane holdInside;
 
-    int currTimeSelected;
     int holdPressed;
+    int currTimeSelected;
     int timeButtonPressed;
+    dur waitTime;
 
     // Constants
     1 => int HOLD_PRESS;
@@ -456,7 +457,8 @@ public class HoldVisualizer extends GGen {
         "Hold UI" => this.name;
 
         // Member variables
-        0 => this.currTimeSelected;
+        0::ms => this.waitTime;
+        this.clickNow();
 
         // Connection
         border --> this;
@@ -485,9 +487,20 @@ public class HoldVisualizer extends GGen {
         }
 
         if (mousePos.y >= 948 && mousePos.y <= 996) {
-            if (mousePos.x >= 27 && mousePos.x <= 108) this.NOW_PRESS => selectMode;
-            if (mousePos.x >= 124 && mousePos.x <= 204) this.SEC2_PRESS => selectMode;
-            if (mousePos.x >= 222 && mousePos.x <= 304) this.SEC5_PRESS => selectMode;
+            if (mousePos.x >= 27 && mousePos.x <= 108) {
+                this.NOW_PRESS => selectMode;
+                0::ms => this.waitTime;
+            }
+
+            if (mousePos.x >= 124 && mousePos.x <= 204){
+                this.SEC2_PRESS => selectMode;
+                2::second => this.waitTime;
+            }
+
+            if (mousePos.x >= 222 && mousePos.x <= 304) {
+                this.SEC5_PRESS => selectMode;
+                5::second => this.waitTime;
+            }
         }
 
         return selectMode;
@@ -519,27 +532,74 @@ public class HoldVisualizer extends GGen {
         this.holdBorder.posZ() + 0.02 => this.holdBorder.posZ;
     }
 
-    // fun void clickLeft() {
-    //     1 => this.leftButtonPressed;
-    //     this.lsBorder.posZ() - 0.02 => this.lsBorder.posZ;
-    //     this.leftSelect.posZ() - 0.02 => this.leftSelect.posZ;
-    // }
+    fun void resetTime() {
+        if (this.currTimeSelected == this.NOW_PRESS) {
+            this.resetNow();
+        } else if (this.currTimeSelected == this.SEC2_PRESS) {
+            this.resetSec2();
+        } else if (this.currTimeSelected == this.SEC5_PRESS) {
+            this.resetSec5();
+        }
+    }
 
-    // fun void resetLeft() {
-    //     0 => this.leftButtonPressed;
-    //     this.lsBorder.posZ() + 0.02 => this.lsBorder.posZ;
-    //     this.leftSelect.posZ() + 0.02 => this.leftSelect.posZ;
-    // }
+    fun void updateTime(int timeSelected) {
+        if (timeSelected == this.NOW_PRESS) {
+            this.clickNow();
+        } else if (timeSelected == this.SEC2_PRESS) {
+            this.clickSec2();
+        } else if (timeSelected == this.SEC5_PRESS) {
+            this.clickSec5();
+        }
+    }
 
-    // fun void clickRight() {
-    //     1 => this.rightButtonPressed;
-    //     this.rsBorder.posZ() - 0.02 => this.rsBorder.posZ;
-    //     this.rightSelect.posZ() - 0.02 => this.rightSelect.posZ;
-    // }
+    fun void clickNow() {
+        this.NOW_PRESS => this.currTimeSelected;
+        Color.BLUE => this.nowInside.color;
+        @(4., 4., 4., 1.) => this.nowTime.color;
 
-    // fun void resetRight() {
-    //     0 => this.rightButtonPressed;
-    //     this.rsBorder.posZ() + 0.02 => this.rsBorder.posZ;
-    //     this.rightSelect.posZ() + 0.02 => this.rightSelect.posZ;
-    // }
+        this.nowTime.posZ() - 0.02 => this.nowTime.posZ;
+        this.nowBorder.posZ() - 0.02 => this.nowBorder.posZ;
+    }
+
+    fun void resetNow() {
+        Color.BLACK => this.nowInside.color;
+        @(2., 2., 2., 1.) => this.nowTime.color;
+
+        this.nowTime.posZ() + 0.02 => this.nowTime.posZ;
+        this.nowBorder.posZ() + 0.02 => this.nowBorder.posZ;
+    }
+
+    fun void clickSec2() {
+        this.SEC2_PRESS => this.currTimeSelected;
+        Color.BLUE => this.sec2Inside.color;
+        @(4., 4., 4., 1.) => this.sec2Time.color;
+
+        this.sec2Time.posZ() - 0.02 => this.sec2Time.posZ;
+        this.sec2Border.posZ() - 0.02 => this.sec2Border.posZ;
+    }
+
+    fun void resetSec2() {
+        Color.BLACK => this.sec2Inside.color;
+        @(2., 2., 2., 1.) => this.sec2Time.color;
+
+        this.sec2Time.posZ() + 0.02 => this.sec2Time.posZ;
+        this.sec2Border.posZ() + 0.02 => this.sec2Border.posZ;
+    }
+
+    fun void clickSec5() {
+        this.SEC5_PRESS => this.currTimeSelected;
+        Color.BLUE => this.sec5Inside.color;
+        @(4., 4., 4., 1.) => this.sec5Time.color;
+
+        this.sec5Time.posZ() - 0.02 => this.sec5Time.posZ;
+        this.sec5Border.posZ() - 0.02 => this.sec5Border.posZ;
+    }
+
+    fun void resetSec5() {
+        Color.BLACK => this.sec5Inside.color;
+        @(2., 2., 2., 1.) => this.sec5Time.color;
+
+        this.sec5Time.posZ() + 0.02 => this.sec5Time.posZ;
+        this.sec5Border.posZ() + 0.02 => this.sec5Border.posZ;
+    }
 }
