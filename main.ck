@@ -87,15 +87,12 @@ Title title;
 TuningSelect tuningUI;
 SoundSelect soundUI;
 
-// Node Test
-// Node node("A#", Color.BLUE);
-
 
 while (true) {
     kp.getKeyPress() @=> Key keysDown[];
     mp.getMouseInfo() @=> MouseInfo mouseInfo;
 
-    <<< "Mouse Pos", mouseInfo.pos >>>;
+    // <<< "Mouse Pos", mouseInfo.pos >>>;
 
     // Handle Mouse Clicks
     if (mouseInfo.leftDown == 1) {
@@ -140,9 +137,11 @@ while (true) {
         kb.visuals.setKeyColor(keyColor, Color.WHITE * 4, key.keyRow, key.keyCol);
         kb.visuals.pressKey(key.keyRow, key.keyCol);
 
+        colorMapper.freqToShard( register, freq ) => int shardCenter;
+        <<< "Key", key.key, "Shard Center", shardCenter >>>;
         kb.getNoteDiff(key.key) => int noteDiff;
-        primaryVisualizer.addPane(key.key, keyColor, noteDiff);
-        secondaryVisualizer.addPane(key.key, keyColor, noteDiff);
+        primaryVisualizer.addPane(key.key, keyColor, shardCenter, noteDiff);
+        secondaryVisualizer.addPane(key.key, keyColor, shardCenter, noteDiff);
     }
 
 

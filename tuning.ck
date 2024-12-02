@@ -39,6 +39,10 @@ public class TuningRegister {
         this.calculateRegisters();
     }
 
+    fun @construct(float tuningFreq) {
+        this.setTuningFreq(tuningFreq);
+    }
+
     fun void setTuningFreq(float tuningFreq) {
         tuningFreq => this.tuningFreq;
         this.calculateRegisters();

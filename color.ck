@@ -29,6 +29,7 @@ public class ColorBounds {
 public class AudioColorMapper {
     int hues[0];
     int numColors;
+    int registerToShardIdx[];
 
     fun @construct() {
         0 => int currHue;
@@ -37,7 +38,38 @@ public class AudioColorMapper {
             currHue + 15 => currHue;
         }
 
+        [
+            -500,
+            -250,
+            0,
+            250,
+            500,
+            750,
+            1000,
+            1250,
+            1500,
+            1750,
+            2000
+        ] @=> this.registerToShardIdx;
+
         this.hues.size() => this.numColors;
+    }
+
+    fun int freqToShard(TuningRegister register, float freq) {
+        register.getOctaveBounds(freq) @=> OctaveBounds octaveBounds;
+
+        this.registerToShardIdx[octaveBounds.register] => int shardStart;
+        this.registerToShardIdx[octaveBounds.register + 1] => int shardEnd;
+
+        Std.scalef(
+            freq,
+            octaveBounds.lowerFreq,
+            octaveBounds.upperFreq,
+            shardStart,
+            shardEnd
+        )$int => int shardCenter;
+
+        return shardCenter;
     }
 
     fun vec3 freqToColor(TuningRegister register, float freq) {

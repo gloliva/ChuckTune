@@ -152,9 +152,8 @@ public class ColorVisualizer extends GGen {
         z => this.scaZ;
     }
 
-    fun void addPane(string key, vec3 color, int noteDiff) {
-        Std.scalef(noteDiff, -2, 2 * this.steps, 100., this.shards.size() - 100)$int => int idx;
-        ColorPane pane(color, noteDiff, idx, 100, this.shards.size());
+    fun void addPane(string key, vec3 color, int shardCenter, int noteDiff) {
+        ColorPane pane(color, noteDiff, shardCenter, 100, this.shards.size());
         this.addPaneToActiveList(pane);
 
         pane @=> this.panesMap[key];
@@ -219,30 +218,11 @@ public class ColorVisualizer extends GGen {
             this.activePanes[idx - 1] @=> ColorPane bottomPane;
             this.activePanes[idx] @=> ColorPane topPane;
 
-            // @(
-            //     (bottomPane.color.x + topPane.color.x) / 2.,
-            //     (bottomPane.color.y + topPane.color.y) / 2.,
-            //     (bottomPane.color.z + topPane.color.z) / 2.
-            // ) => vec3 blend;
-
             Color.rgb2hsv(bottomPane.color).x => float leftHue;
             Color.rgb2hsv(topPane.color).x => float rightHue;
 
             ( (leftHue + rightHue) / 2 ) % 360 => float blendHue;
             Color.hsv2rgb(@(blendHue, 1., 1.)) => vec3 blend;
-
-            // ( bottomPane.color.x )$int + 1 => int maxVal;
-
-            // @(
-            //     maxVal - (maxVal - bottomPane.color.x) - (maxVal - topPane.color.x),
-            //     maxVal - (maxVal - bottomPane.color.y) - (maxVal - topPane.color.y),
-            //     maxVal - (maxVal - bottomPane.color.z) - (maxVal - topPane.color.z)
-            // ) => vec3 blend;
-
-
-            // if (blend.x < 0) 0 => blend.x;
-            // if (blend.y < 0) 0 => blend.y;
-            // if (blend.z < 0) 0 => blend.z;
 
             if (bottomPane.upper > topPane.lower) {
                 this.shards[topPane.lower].color() => vec3 bottomColor;
@@ -253,20 +233,6 @@ public class ColorVisualizer extends GGen {
                 this.setColorGradient(bottomPane.color, blend, topPane.lower, midPoint);
                 this.setColorGradient(blend, topColor, midPoint, bottomPane.upper);
             }
-
-            // if (bottomPane.upper > topPane.lower) {
-            //     this.setColor(topPane.color, bottomPane.upper, topPane.upper);
-            // } else {
-            //     this.setColor(topPane.color, topPane.lower, topPane.upper);
-            // }
-
-            // topPane.getIntersectedShard(bottomPane) => int shardIdx;
-
-            // if (shardIdx != -1) {
-            //     topPane.setColorGradient(bottomPane.shards[shardIdx].color(), topPane.baseColor);
-            // } else {
-            //     topPane.resetColor();
-            // }
         }
     }
 }
