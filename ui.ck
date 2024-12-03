@@ -223,7 +223,27 @@ public class SoundSelect extends GGen {
     int leftButtonPressed;
     int rightButtonPressed;
 
+    int currName;
+    string names[];
+
     fun @construct() {
+        // Sound names
+        0 => this.currName;
+        [
+            "SinOsc",
+            "TriOsc",
+            "SawOsc",
+            "SqrOsc",
+            "Voices",
+            "Choir",
+            "Horn",
+            "Flute",
+            "HT Piano",
+            "Hammond",
+
+        ] @=> this.names;
+        this.setName(this.currName);
+
         // Scaling
         @(1.5, 1., 0.05) => this.border.sca;
         @(1.4, 0.9, 0.9) => this.inside.sca;
@@ -345,8 +365,23 @@ public class SoundSelect extends GGen {
         this.rightSelect.posZ() + 0.02 => this.rightSelect.posZ;
     }
 
-    fun void setText(string text) {
+    fun void setName(int idx) {
+        this.names[idx] => string text;
         text => this.instrument.text;
+    }
+
+    fun void changeName(int diff) {
+        this.currName + diff => int newName;
+
+        if (newName < 0) {
+            newName + this.names.size() => newName;
+        }
+
+        newName % this.names.size() => newName;
+
+        this.names[newName] => string text;
+        text => this.instrument.text;
+        newName => this.currName;
     }
 }
 

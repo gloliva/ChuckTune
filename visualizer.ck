@@ -290,12 +290,23 @@ public class ColorVisualizer extends GGen {
                 ( (leftHue + rightHue) / 2 ) % 360 => float blendHue;
                 Color.hsv2rgb(@(blendHue, 1., 1.)) => vec3 blend;
 
+                // TODO: If topPane.lower < bottomPane.center, just blend from center
+
                 if (bottomPane.upper > topPane.lower) {
-                    this.shards[topPane.lower].color() => vec3 bottomColor;
+                    int topLowerIdx;
+
+                    if (topPane.lower < bottomPane.center) {
+                        bottomPane.center + 1 => topLowerIdx;
+                        // <<< "New IDX", topLowerIdx, "Old IDX", topPane.lower >>>;
+                    } else {
+                        topPane.lower => topLowerIdx;
+                    }
+
+                    this.shards[topLowerIdx].color() => vec3 bottomColor;
                     this.shards[bottomPane.upper].color() => vec3 topColor;
 
-                    ((bottomPane.upper - topPane.lower) / 2)$int + topPane.lower => int midPoint;
-                    this.setColorGradient(bottomColor, blend, topPane.lower, midPoint);
+                    ((bottomPane.upper - topLowerIdx) / 2)$int + topLowerIdx => int midPoint;
+                    this.setColorGradient(bottomColor, blend, topLowerIdx, midPoint);
                     this.setColorGradient(blend, topColor, midPoint, bottomPane.upper);
                     this.setColor(topPane.color, bottomPane.upper, topPane.upper);
                 } else {
