@@ -13,7 +13,8 @@ public class VoiceSelect {
     Osc oscVoices[];
     FM fmVoices[];
     Gain gains[];
-    Envelope envs[];
+    Envelope envUp(500::ms);
+    Envelope envDown(500::ms);
     Gain mix;
 
     int numVoices;
@@ -22,6 +23,9 @@ public class VoiceSelect {
     string names[];
 
     fun @construct() {
+
+        this.envUp => blackhole;
+        this.envDown => blackhole;
 
         [
             new SinOsc(),
@@ -53,19 +57,6 @@ public class VoiceSelect {
         ] @=> this.gains;
 
         [
-            new Envelope(500::ms),
-            new Envelope(500::ms),
-            new Envelope(500::ms),
-            new Envelope(500::ms),
-            new Envelope(500::ms),
-            new Envelope(500::ms),
-            new Envelope(500::ms),
-            new Envelope(500::ms),
-            new Envelope(500::ms),
-            new Envelope(500::ms),
-        ] @=> this.envs;
-
-        [
             "SinOsc",
             "TriOsc",
             "SawOsc",
@@ -76,7 +67,6 @@ public class VoiceSelect {
             "Flute",
             "HT Piano",
             "Hammond",
-
         ] @=> this.names;
 
         this.oscVoices.size() + this.fmVoices.size() => this.numVoices;
@@ -85,12 +75,14 @@ public class VoiceSelect {
 
         // Hook up to Mix
         for (int idx; idx < this.oscVoices.size(); idx++) {
-            this.oscVoices[idx] => this.envs[idx] => this.gains[idx] => this.mix;
+            this.oscVoices[idx] => this.gains[idx] => this.mix;
+            0. => this.oscVoices[idx].gain;
         }
 
         for (int idx; idx < this.fmVoices.size(); idx++) {
-            this.fmVoices[idx] => this.envs[idx + this.oscVoices.size()] => this.gains[idx + this.oscVoices.size()] => this.mix;
+            this.fmVoices[idx] => this.gains[idx + this.oscVoices.size()] => this.mix;
             this.fmVoices[idx].noteOn(1.);
+            0. => this.fmVoices[idx].gain;
         }
     }
 
@@ -98,9 +90,47 @@ public class VoiceSelect {
         this.currVoice => int prevVoice;
         idx % this.numVoices => this.currVoice;
 
-        this.envs[prevVoice].keyOff(1);
-        this.envs[this.currVoice].keyOn(1);
-        500::ms => now;
+        // CrossFade between voices
+        now + 500::ms => time end;
+
+        0. => this.envUp.value;
+        1. => this.envDown.value;
+
+        this.envUp.ramp(500::ms, 1.);
+        this.envDown.ramp(500::ms, 0.);
+
+        while (now < end) {
+            this.envDown.value() => float envDownVal;
+            this.envUp.value() => float envUpVal;
+
+            if (prevVoice < this.oscVoices.size()) {
+                envDownVal => this.oscVoices[prevVoice].gain;
+            } else {
+                envDownVal => this.fmVoices[prevVoice - this.oscVoices.size()].gain;
+            }
+
+            if (this.currVoice < this.oscVoices.size()) {
+                envUpVal => this.oscVoices[this.currVoice].gain;
+            } else {
+                envUpVal => this.fmVoices[this.currVoice - this.oscVoices.size()].gain;
+            }
+
+            50::ms => now;
+        }
+
+        // Set prevGain
+        if (prevVoice < this.oscVoices.size()) {
+            0. => this.oscVoices[prevVoice].gain;
+        } else {
+            0. => this.fmVoices[prevVoice - this.oscVoices.size()].gain;
+        }
+
+        // Set currGain
+        if (this.currVoice < this.oscVoices.size()) {
+            1. => this.oscVoices[this.currVoice].gain;
+        } else {
+            1. => this.fmVoices[this.currVoice - this.oscVoices.size()].gain;
+        }
     }
 
     fun void change(int diff) {
