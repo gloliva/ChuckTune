@@ -1,10 +1,16 @@
 /*
 
     TODO: IDEAS
-    - Freeze Current band to compare to a different tuning (persists across tunings)
-        - Instant Hold + Timed Hold
-    - Show band from different tuning at same time as current band
-    - Zoom in and out of bands (and scroll)
+    - [x] Freeze Current band to compare to a different tuning (persists across tunings)
+        - [x] Instant Hold + Timed Hold
+    - [x] Zoom in and out of bands (and scroll)
+    - [ ] Show band from different tuning at same time as current band (in-real time)
+    - [ ] Add a blend mode that shows Note names
+    - [ ] Add a blend mode that shows interval names between notes
+    - [ ] Envelope color when going to and from black
+    - [ ] Add color themes
+    - [ ] Additional tunings
+    - [ ] Support Scala files with notation
 
 */
 
