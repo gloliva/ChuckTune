@@ -86,6 +86,25 @@ public class VoiceSelect {
         }
     }
 
+    fun void set(int idx) {
+        this.currVoice => int prevVoice;
+        idx % this.numVoices => this.currVoice;
+
+        // Set prevGain
+        if (prevVoice < this.oscVoices.size()) {
+            0. => this.oscVoices[prevVoice].gain;
+        } else {
+            0. => this.fmVoices[prevVoice - this.oscVoices.size()].gain;
+        }
+
+        // Set currGain
+        if (this.currVoice < this.oscVoices.size()) {
+            1. => this.oscVoices[this.currVoice].gain;
+        } else {
+            1. => this.fmVoices[this.currVoice - this.oscVoices.size()].gain;
+        }
+    }
+
     fun void select(int idx) {
         this.currVoice => int prevVoice;
         idx % this.numVoices => this.currVoice;
@@ -177,7 +196,7 @@ public class Voice {
 
     fun @construct(int voiceSelect) {
         this.voice.mix => this.g => this.env => this.rev => dac;
-        this.select(voiceSelect);
+        this.set(voiceSelect);
 
         100::ms => this.env.duration;
         0.1 => this.g.gain;
@@ -190,6 +209,10 @@ public class Voice {
 
     fun void freq(float f) {
         f => this.voice.freq;
+    }
+
+    fun void set(int idx) {
+        this.voice.set(idx);
     }
 
     fun void select(int idx) {
