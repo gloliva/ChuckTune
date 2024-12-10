@@ -12,8 +12,8 @@ public class VoiceState {
 public class VoiceSelect {
     Osc oscVoices[];
     FM fmVoices[];
-    float fmGains[];
     Gain gains[];
+    Envelope envs[];
     Gain mix;
 
     int numVoices;
@@ -22,6 +22,7 @@ public class VoiceSelect {
     string names[];
 
     fun @construct() {
+
         [
             new SinOsc(),
             new TriOsc(),
@@ -39,26 +40,30 @@ public class VoiceSelect {
         ] @=> this.fmVoices;
 
         [
-            1.2,
-            2.2,
-            1.8,
-            4.,
-            3.,
-            3.
-        ] @=> this.fmGains;
+            new Gain(1.5),
+            new Gain(2.2),
+            new Gain(0.7),
+            new Gain(0.6),
+            new Gain(1.2),
+            new Gain(2.2),
+            new Gain(1.8),
+            new Gain(4.2),
+            new Gain(3.),
+            new Gain(3.),
+        ] @=> this.gains;
 
         [
-            new Gain(0.),
-            new Gain(0.),
-            new Gain(0.),
-            new Gain(0.),
-            new Gain(0.),
-            new Gain(0.),
-            new Gain(0.),
-            new Gain(0.),
-            new Gain(0.),
-            new Gain(0.),
-        ] @=> this.gains;
+            new Envelope(500::ms),
+            new Envelope(500::ms),
+            new Envelope(500::ms),
+            new Envelope(500::ms),
+            new Envelope(500::ms),
+            new Envelope(500::ms),
+            new Envelope(500::ms),
+            new Envelope(500::ms),
+            new Envelope(500::ms),
+            new Envelope(500::ms),
+        ] @=> this.envs;
 
         [
             "SinOsc",
@@ -76,23 +81,26 @@ public class VoiceSelect {
 
         this.oscVoices.size() + this.fmVoices.size() => this.numVoices;
         0 => currVoice;
-        1. => this.mix.gain;
+        0.4 => this.mix.gain;
 
         // Hook up to Mix
         for (int idx; idx < this.oscVoices.size(); idx++) {
-            this.oscVoices[idx] => this.gains[idx] => this.mix;
+            this.oscVoices[idx] => this.envs[idx] => this.gains[idx] => this.mix;
         }
 
         for (int idx; idx < this.fmVoices.size(); idx++) {
-            this.fmVoices[idx] => this.gains[idx + this.oscVoices.size()] => this.mix;
-            this.fmVoices[idx].noteOn(this.fmGains[idx]);
+            this.fmVoices[idx] => this.envs[idx + this.oscVoices.size()] => this.gains[idx + this.oscVoices.size()] => this.mix;
+            this.fmVoices[idx].noteOn(1.);
         }
     }
 
     fun void select(int idx) {
-        0. => this.gains[this.currVoice].gain;
+        this.currVoice => int prevVoice;
         idx % this.numVoices => this.currVoice;
-        1. => this.gains[this.currVoice].gain;
+
+        this.envs[prevVoice].keyOff(1);
+        this.envs[this.currVoice].keyOn(1);
+        500::ms => now;
     }
 
     fun void change(int diff) {
@@ -210,8 +218,10 @@ public class Instrument {
 
     fun void changeVoiceInstrument(int voiceDiff) {
         for (Voice voice : this.voices) {
-            voice.change(voiceDiff);
+            spork ~ voice.change(voiceDiff);
         }
+
+        5::second => now;
     }
 
     fun string getVoiceName() {
