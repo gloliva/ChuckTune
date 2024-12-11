@@ -40,6 +40,13 @@ public class Frame extends GGen {
         rightEdge --> this;
         this --> GG.scene();
     }
+
+    fun void setTheme(vec3 color) {
+        color => this.topEdge.color;
+        color => this.bottomEdge.color;
+        color => this.leftEdge.color;
+        color => this.rightEdge.color;
+    }
 }
 
 
@@ -64,5 +71,9 @@ public class Blocker extends GGen {
         "Blocker Cube" => this.blocker.name;
         "Blocker" => this.name;
         this.blocker --> this --> GG.scene();
+    }
+
+    fun void setTheme(vec3 color) {
+        color => this.blocker.color;
     }
 }

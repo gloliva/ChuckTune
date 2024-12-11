@@ -21,6 +21,7 @@
 @import "instrument.ck"
 @import "keyboard.ck"
 @import "nodes.ck"
+@import "themes.ck"
 @import "tuning.ck"
 @import "ui.ck"
 @import "visualizer.ck"
@@ -99,6 +100,9 @@ KeyPoller kp;
 Keyboard kb(tuningManager.getTuning());
 MousePoller mp;
 
+// Themes
+ThemeManager themes;
+
 // UI
 Title title;
 TuningSelect tuningUI;
@@ -106,10 +110,13 @@ SoundSelect soundUI;
 HoldVisualizer holdUI;
 BlendSelect blendUI;
 MoveVisualizer moveUI;
+ThemeSelect themeUI;
 
 
 while (true) {
     mp.getMouseInfo() @=> MouseInfo mouseInfo;
+
+    mouseInfo.print();
 
     // Handle Mouse Clicks
     if (mouseInfo.leftDown == 1) {
@@ -168,6 +175,39 @@ while (true) {
             holdUI.resetTime();
             holdUI.updateTime(holdSelectMode);
         }
+
+        // Update theme
+        themeUI.checkIfSelected(mouseInfo.pos) => int themeSelectMode;
+
+        if (themeSelectMode != 0) {
+            themes.changeTheme(themeSelectMode);
+            themeUI.setText(themes.getThemeName());
+            themes.getTheme() @=> Theme currTheme;
+
+            // Update themes for each UI element
+            title.setTheme(currTheme);
+            tuningUI.setTheme(currTheme);
+            blendUI.setTheme(currTheme);
+            holdUI.setTheme(currTheme);
+            moveUI.setTheme(currTheme);
+            soundUI.setTheme(currTheme);
+            themeUI.setTheme(currTheme);
+
+            // Update theme for keyboard
+            kb.setTheme(currTheme);
+
+            // Update background color
+            blockLeft.setTheme(currTheme.background);
+            blockRight.setTheme(currTheme.background);
+            blockTop.setTheme(currTheme.background);
+            blockBottom.setTheme(currTheme.background);
+
+            topFrame.setTheme(currTheme.secondary);
+            bottomFrame.setTheme(currTheme.secondary);
+        }
+
+        if (themeSelectMode == -1) themeUI.clickLeft();
+        if (themeSelectMode == 1) themeUI.clickRight();
     }
 
     if (mouseInfo.leftHeld == 1) {
@@ -201,6 +241,9 @@ while (true) {
         if (moveUI.rightButtonPressed == 1) moveUI.resetRight();
         if (moveUI.plusButtonPressed == 1) moveUI.resetPlus();
         if (moveUI.minusButtonPressed == 1) moveUI.resetMinus();
+
+        if (themeUI.leftButtonPressed == 1) themeUI.resetLeft();
+        if (themeUI.rightButtonPressed == 1) themeUI.resetRight();
     }
 
     // Handle Key presses
@@ -226,7 +269,7 @@ while (true) {
     kp.getKeyRelease() @=> Key keysUp[];
     for (Key key : keysUp) {
         inst.voiceOff(key.key);
-        kb.visuals.setKeyColor(Color.BLACK, Color.WHITE * 2., key.keyRow, key.keyCol);
+        kb.visuals.setKeyColor(themes.getTheme().primary, Color.WHITE * 2., key.keyRow, key.keyCol);
         kb.visuals.releaseKey(key.keyRow, key.keyCol);
         primaryVisualizer.removePane(key.key);
         secondaryVisualizer.removePane(key.key);

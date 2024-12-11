@@ -1,3 +1,6 @@
+@import "themes.ck"
+
+
 public class Text {
     string text;
     float scale;
@@ -17,8 +20,8 @@ public class Title extends GGen {
 
     fun @construct() {
         // Scaling
-        @(1.5, 1.9, 0.05) => this.border.sca;
-        @(1.4, 1.75, 0.9) => this.inside.sca;
+        @(1.5, 1., 0.05) => this.border.sca;
+        @(1.4, 0.9, 0.9) => this.inside.sca;
         @(0.4, 0.4, 0.4) => this.titleTop.sca;
         @(0.5, 0.4, 0.4) => this.titleBot.sca;
 
@@ -29,7 +32,7 @@ public class Title extends GGen {
         @(0, 0.2, 0.01) => this.titleTop.pos;
         @(0, -0.2, 0.01) => this.titleBot.pos;
 
-        @(-5.12, 2.38, 0.) => this.pos;
+        @(-5.12, 2.81, 0.) => this.pos;
 
         // Color
         Color.WHITE * 2. => this.border.color;
@@ -54,6 +57,11 @@ public class Title extends GGen {
         titleTop --> this;
         titleBot --> this;
         this --> GG.scene();
+    }
+
+    fun void setTheme(Theme newTheme) {
+        newTheme.primary => this.inside.color;
+        newTheme.secondary => this.border.color;
     }
 }
 
@@ -110,7 +118,7 @@ public class TuningSelect extends GGen {
         @(0.3, -0.25, 0) => this.rsBorder.pos;
         0.501 => this.rsInside.posZ;
 
-        @(-5.12, 1.0, 0.) => this.pos;
+        @(-5.12, 1.85, 0.) => this.pos;
 
         // Text
         "12 EDO" => this.tuning.text;
@@ -166,7 +174,7 @@ public class TuningSelect extends GGen {
 
     fun int checkIfSelected(vec2 mousePos) {
         0 => int selectMode;
-        if (mousePos.y >= 534 && mousePos.y <= 584) {
+        if (mousePos.y >= 348 && mousePos.y <= 398) {
             if (mousePos.x >= 75 && mousePos.x <= 125) -1 => selectMode;
             if (mousePos.x >= 205 && mousePos.x <= 255) 1 => selectMode;
         }
@@ -200,6 +208,18 @@ public class TuningSelect extends GGen {
 
     fun void setText(string text) {
         text => this.tuning.text;
+    }
+
+    fun void setTheme(Theme newTheme) {
+        newTheme.primary => this.inside.color;
+        newTheme.primary => this.lsInside.color;
+        newTheme.primary => this.rsInside.color;
+        newTheme.primary => this.tInside.color;
+
+        newTheme.secondary => this.border.color;
+        newTheme.secondary => this.lsBorder.color;
+        newTheme.secondary => this.rsBorder.color;
+        newTheme.secondary => this.tBorder.color;
     }
 }
 
@@ -276,7 +296,7 @@ public class SoundSelect extends GGen {
         @(0.3, -0.25, 0) => this.rsBorder.pos;
         0.501 => this.rsInside.posZ;
 
-        @(-5.12, -2.8, 0.) => this.pos;
+        @(-5.12, -1.84, 0.) => this.pos;
 
         // Text
         "SinOsc" => this.instrument.text;
@@ -333,7 +353,7 @@ public class SoundSelect extends GGen {
     fun int checkIfSelected(vec2 mousePos) {
         0 => int selectMode;
 
-        if (mousePos.y >= 1362 && mousePos.y <= 1412) {
+        if (mousePos.y >= 1153 && mousePos.y <= 1202) {
             if (mousePos.x >= 75 && mousePos.x <= 125) -1 => selectMode;
             if (mousePos.x >= 205 && mousePos.x <= 255) 1 => selectMode;
         }
@@ -382,6 +402,18 @@ public class SoundSelect extends GGen {
         this.names[newName] => string text;
         text => this.instrument.text;
         newName => this.currName;
+    }
+
+    fun void setTheme(Theme newTheme) {
+        newTheme.primary => this.inside.color;
+        newTheme.primary => this.lsInside.color;
+        newTheme.primary => this.rsInside.color;
+        newTheme.primary => this.iInside.color;
+
+        newTheme.secondary => this.border.color;
+        newTheme.secondary => this.lsBorder.color;
+        newTheme.secondary => this.rsBorder.color;
+        newTheme.secondary => this.iBorder.color;
     }
 }
 
@@ -458,7 +490,7 @@ public class HoldVisualizer extends GGen {
         @(0.45, -0.25, 0) => this.sec5Border.pos;
         0.501 => this.sec5Inside.posZ;
 
-        @(-5.12, -0.9, 0.) => this.pos;
+        @(-5.12, -0.07, 0.) => this.pos;
 
         // Text
         "HOLD" => this.hold.text;
@@ -529,11 +561,11 @@ public class HoldVisualizer extends GGen {
     fun int checkIfSelected(vec2 mousePos) {
         0 => int selectMode;
 
-        if (mousePos.y >= 850 && mousePos.y <= 920) {
+        if (mousePos.y >= 671 && mousePos.y <= 738) {
             if (mousePos.x >= 38 && mousePos.x <= 294) this.HOLD_PRESS => selectMode;
         }
 
-        if (mousePos.y >= 948 && mousePos.y <= 996) {
+        if (mousePos.y >= 767 && mousePos.y <= 815) {
             if (mousePos.x >= 27 && mousePos.x <= 108) {
                 this.NOW_PRESS => selectMode;
                 0::ms => this.waitTime;
@@ -649,6 +681,20 @@ public class HoldVisualizer extends GGen {
         this.sec5Time.posZ() + 0.02 => this.sec5Time.posZ;
         this.sec5Border.posZ() + 0.02 => this.sec5Border.posZ;
     }
+
+    fun void setTheme(Theme newTheme) {
+        newTheme.primary => this.inside.color;
+        newTheme.primary => this.holdInside.color;
+        newTheme.primary => this.nowInside.color;
+        newTheme.primary => this.sec2Inside.color;
+        newTheme.primary => this.sec5Inside.color;
+
+        newTheme.secondary => this.border.color;
+        newTheme.secondary => this.holdBorder.color;
+        newTheme.secondary => this.nowBorder.color;
+        newTheme.secondary => this.sec2Border.color;
+        newTheme.secondary => this.sec5Border.color;
+    }
 }
 
 
@@ -704,7 +750,7 @@ public class BlendSelect extends GGen {
         @(0.3, -0.25, 0) => this.rsBorder.pos;
         0.501 => this.rsInside.posZ;
 
-        @(-5.12, 0.05, 0.) => this.pos;
+        @(-5.12, 0.89, 0.) => this.pos;
 
         // Text
         "Blend" => this.blend.text;
@@ -760,7 +806,7 @@ public class BlendSelect extends GGen {
 
     fun int checkIfSelected(vec2 mousePos) {
         0 => int selectMode;
-        if (mousePos.y >= 742 && mousePos.y <= 790) {
+        if (mousePos.y >= 558 && mousePos.y <= 607) {
             if (mousePos.x >= 75 && mousePos.x <= 125) -1 => selectMode;
             if (mousePos.x >= 205 && mousePos.x <= 255) 1 => selectMode;
         }
@@ -800,6 +846,18 @@ public class BlendSelect extends GGen {
         text => this.blend.text;
         @(scale, scale, scale) => this.blend.sca;
     }
+
+    fun void setTheme(Theme newTheme) {
+        newTheme.primary => this.inside.color;
+        newTheme.primary => this.lsInside.color;
+        newTheme.primary => this.rsInside.color;
+        newTheme.primary => this.blendInside.color;
+
+        newTheme.secondary => this.border.color;
+        newTheme.secondary => this.lsBorder.color;
+        newTheme.secondary => this.rsBorder.color;
+        newTheme.secondary => this.blendBorder.color;
+    }
 }
 
 
@@ -836,8 +894,8 @@ public class MoveVisualizer extends GGen {
 
     fun @construct() {
         // Scaling
-        @(1.5, 1., 0.05) => this.border.sca;
-        @(1.4, 0.9, 0.9) => this.inside.sca;
+        @(1.5, 0.85, 0.05) => this.border.sca;
+        @(1.4, 0.75, 0.9) => this.inside.sca;
 
         @(0.2, 0.2, 0.2) => this.leftSelect.sca;
         @(0.25, 0.25, 0.05) => this.lsBorder.sca;
@@ -859,24 +917,24 @@ public class MoveVisualizer extends GGen {
         -0.025 => this.border.posZ;
         0.001 => this.inside.posZ;
 
-        @(-0.3, -0.25, 0.0251) => this.leftSelect.pos;
-        @(-0.3, -0.25, 0) => this.lsBorder.pos;
+        @(-0.18, -0.18, 0.0251) => this.leftSelect.pos;
+        @(-0.18, -0.18, 0) => this.lsBorder.pos;
         0.501 => this.lsInside.posZ;
 
-        @(0.3, -0.25, 0.0251) => this.rightSelect.pos;
-        @(0.3, -0.25, 0) => this.rsBorder.pos;
+        @(0.18, -0.18, 0.0251) => this.rightSelect.pos;
+        @(0.18, -0.18, 0) => this.rsBorder.pos;
         0.501 => this.rsInside.posZ;
 
-        @(-0.3, 0.25, 0.0251) => this.plusSelect.pos;
-        @(-0.3, 0.25, 0) => this.plusBorder.pos;
+        @(-0.18, 0.18, 0.0251) => this.plusSelect.pos;
+        @(-0.18, 0.18, 0) => this.plusBorder.pos;
         0.501 => this.plusInside.posZ;
 
-        @(0.3, 0.25, 0.0251) => this.minusSelect.pos;
-        @(0.3, 0.25, 0) => this.minusBorder.pos;
+        @(0.18, 0.18, 0.0251) => this.minusSelect.pos;
+        @(0.18, 0.18, 0) => this.minusBorder.pos;
         0.501 => this.minusInside.posZ;
 
 
-        @(-5.12, -1.85, 0.) => this.pos;
+        @(-5.12, -0.95, 0.) => this.pos;
 
         // Text
         "+" => this.plusSelect.text;
@@ -941,12 +999,12 @@ public class MoveVisualizer extends GGen {
     fun int checkIfSelected(vec2 mousePos) {
         0 => int selectMode;
 
-        if (mousePos.y >= 1046 && mousePos.y <= 1096) {
+        if (mousePos.y >= 866 && mousePos.y <= 913) {
             if (mousePos.x >= 75 && mousePos.x <= 125) this.PLUS => selectMode;
             if (mousePos.x >= 205 && mousePos.x <= 255) this.MINUS => selectMode;
         }
 
-        if (mousePos.y >= 1155 && mousePos.y <= 1205) {
+        if (mousePos.y >= 944 && mousePos.y <= 992) {
             if (mousePos.x >= 75 && mousePos.x <= 125) this.LEFT => selectMode;
             if (mousePos.x >= 205 && mousePos.x <= 255) this.RIGHT => selectMode;
         }
@@ -1000,5 +1058,177 @@ public class MoveVisualizer extends GGen {
         0 => this.minusButtonPressed;
         this.minusBorder.posZ() + 0.02 => this.minusBorder.posZ;
         this.minusSelect.posZ() + 0.02 => this.minusSelect.posZ;
+    }
+
+    fun void setTheme(Theme newTheme) {
+        newTheme.primary => this.inside.color;
+        newTheme.primary => this.lsInside.color;
+        newTheme.primary => this.rsInside.color;
+        newTheme.primary => this.plusInside.color;
+        newTheme.primary => this.minusInside.color;
+
+        newTheme.secondary => this.border.color;
+        newTheme.secondary => this.lsBorder.color;
+        newTheme.secondary => this.rsBorder.color;
+        newTheme.secondary => this.plusBorder.color;
+        newTheme.secondary => this.minusBorder.color;
+    }
+}
+
+
+public class ThemeSelect extends GGen {
+    GCube border;
+    GPlane inside;
+
+    GText leftSelect;
+    GCube lsBorder;
+    GPlane lsInside;
+
+    GText rightSelect;
+    GCube rsBorder;
+    GPlane rsInside;
+
+    GText theme;
+    GCube tBorder;
+    GPlane tInside;
+
+    int leftButtonPressed;
+    int rightButtonPressed;
+
+    fun @construct() {
+        // Scaling
+        @(1.5, 1., 0.05) => this.border.sca;
+        @(1.4, 0.9, 0.9) => this.inside.sca;
+
+        @(0.2, 0.2, 0.2) => this.leftSelect.sca;
+        @(0.25, 0.25, 0.05) => this.lsBorder.sca;
+        @(0.9, 0.9, 0.9) => this.lsInside.sca;
+
+        @(0.2, 0.2, 0.2) => this.rightSelect.sca;
+        @(0.25, 0.25, 0.05) => this.rsBorder.sca;
+        @(0.9, 0.9, 0.9) => this.rsInside.sca;
+
+        @(0.2, 0.2, 0.2) => this.theme.sca;
+        @(1.2, 0.35, 0.05) => this.tBorder.sca;
+        @(0.98, 0.9, 0.9) => this.tInside.sca;
+
+        // Position
+        -0.025 => this.border.posZ;
+        0.001 => this.inside.posZ;
+
+        @(0, 0.15, 0.0251) => this.theme.pos;
+        @(0, 0.15, 0) => this.tBorder.pos;
+        0.501 => this.tInside.posZ;
+
+        @(-0.3, -0.25, 0.0251) => this.leftSelect.pos;
+        @(-0.3, -0.25, 0) => this.lsBorder.pos;
+        0.501 => this.lsInside.posZ;
+
+        @(0.3, -0.25, 0.0251) => this.rightSelect.pos;
+        @(0.3, -0.25, 0) => this.rsBorder.pos;
+        0.501 => this.rsInside.posZ;
+
+        @(-5.12, -2.81, 0.) => this.pos;
+
+        // Text
+        "Classic" => this.theme.text;
+        "<" => this.leftSelect.text;
+        ">" => this.rightSelect.text;
+
+        // Color
+        Color.WHITE * 2. => this.border.color;
+        Color.WHITE * 2. => this.lsBorder.color;
+        Color.WHITE * 2. => this.rsBorder.color;
+        Color.WHITE * 2. => this.tBorder.color;
+
+        Color.BLACK => this.inside.color;
+        Color.BLACK => this.lsInside.color;
+        Color.BLACK => this.rsInside.color;
+        Color.BLACK => this.tInside.color;
+
+        @(2., 2., 2., 1.) => this.theme.color;
+
+        // Name
+        "Border" => this.border.name;
+        "Inside" => this.inside.name;
+
+        "Left Select" => this.leftSelect.name;
+        "LS Border" => this.lsBorder.name;
+        "LS Inside" => this.lsInside.name;
+
+        "Right Select" => this.rightSelect.name;
+        "RS Border" => this.rsBorder.name;
+        "RS Inside" => this.rsInside.name;
+
+        "Selected Theme" => this.theme.name;
+        "T Border" => this.tBorder.name;
+        "T Inside" => this.tInside.name;
+
+        "Theme UI" => this.name;
+
+        // Connection
+        border --> this;
+        inside --> this;
+
+        leftSelect --> this;
+        lsInside --> lsBorder --> this;
+
+        rightSelect --> this;
+        rsInside --> rsBorder --> this;
+
+        theme --> this;
+        tInside --> tBorder --> this;
+
+        this --> GG.scene();
+    }
+
+    fun int checkIfSelected(vec2 mousePos) {
+        0 => int selectMode;
+        if (mousePos.y >= 1364 && mousePos.y <= 1414) {
+            if (mousePos.x >= 75 && mousePos.x <= 125) -1 => selectMode;
+            if (mousePos.x >= 205 && mousePos.x <= 255) 1 => selectMode;
+        }
+
+        return selectMode;
+    }
+
+    fun void clickLeft() {
+        1 => this.leftButtonPressed;
+        this.lsBorder.posZ() - 0.02 => this.lsBorder.posZ;
+        this.leftSelect.posZ() - 0.02 => this.leftSelect.posZ;
+    }
+
+    fun void resetLeft() {
+        0 => this.leftButtonPressed;
+        this.lsBorder.posZ() + 0.02 => this.lsBorder.posZ;
+        this.leftSelect.posZ() + 0.02 => this.leftSelect.posZ;
+    }
+
+    fun void clickRight() {
+        1 => this.rightButtonPressed;
+        this.rsBorder.posZ() - 0.02 => this.rsBorder.posZ;
+        this.rightSelect.posZ() - 0.02 => this.rightSelect.posZ;
+    }
+
+    fun void resetRight() {
+        0 => this.rightButtonPressed;
+        this.rsBorder.posZ() + 0.02 => this.rsBorder.posZ;
+        this.rightSelect.posZ() + 0.02 => this.rightSelect.posZ;
+    }
+
+    fun void setText(string text) {
+        text => this.theme.text;
+    }
+
+    fun void setTheme(Theme newTheme) {
+        newTheme.primary => this.inside.color;
+        newTheme.primary => this.lsInside.color;
+        newTheme.primary => this.rsInside.color;
+        newTheme.primary => this.tInside.color;
+
+        newTheme.secondary => this.border.color;
+        newTheme.secondary => this.lsBorder.color;
+        newTheme.secondary => this.rsBorder.color;
+        newTheme.secondary => this.tBorder.color;
     }
 }

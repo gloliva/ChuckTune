@@ -1,4 +1,5 @@
 @import "files.ck"
+@import "themes.ck"
 
 
 public class Keyboard {
@@ -88,6 +89,14 @@ public class Keyboard {
             }
         }
     }
+
+    fun void setTheme(Theme currTheme) {
+        for (int row; row < this.keyboardLayout.size(); row++) {
+            for (int col; col < this.keyboardLayout[row].size(); col++) {
+                this.visuals.setTheme(currTheme, row, col);
+            }
+        }
+    }
 }
 
 
@@ -165,6 +174,11 @@ public class KeyboardKey extends GGen {
     fun string getNote() {
         return this.noteLetter.text();
     }
+
+    fun void setTheme(Theme currTheme) {
+        currTheme.primary => this.inside.color;
+        currTheme.secondary => this.border.color;
+    }
 }
 
 
@@ -226,6 +240,10 @@ public class KeyboardRow extends GGen {
 
     fun KeyboardKey getKey(int col) {
         return this.row[col];
+    }
+
+    fun void setTheme(Theme currTheme, int col) {
+        this.row[col].setTheme(currTheme);
     }
 }
 
@@ -293,5 +311,9 @@ public class KeyboardVisuals extends GGen {
 
     fun KeyboardRow getRow(int row) {
         return this.rows[row];
+    }
+
+    fun void setTheme(Theme currTheme, int row, int col) {
+        this.rows[row].setTheme(currTheme, col);
     }
 }
