@@ -70,6 +70,35 @@ public class NotePane extends GGen {
 }
 
 
+public class IntervalLine extends GGen {
+    GLines line;
+    NotePane @ intervalPane;
+
+    fun @construct(string intervalName, vec3 color, vec2 points[], float width) {
+        // Setup lines
+        width => this.line.width;
+        points => this.line.positions;
+
+        // Setup interval
+        new NotePane(color, intervalName) @=> this.intervalPane;
+
+        // Position
+        0.01 => this.posZ;
+
+        (points[1].x + points[0].x) / 2. => float xPos;
+        xPos => this.intervalPane.posX;
+
+        // Names
+        "Line" => this.line.name;
+        "Interval Line" => this.name;
+
+        // Connections
+        this.line --> this;
+        this.intervalPane --> this;
+    }
+}
+
+
 public class ColorPane {
     vec3 color;
     string noteName;
@@ -82,6 +111,8 @@ public class ColorPane {
 
     // Visuals
     NotePane @ noteVisuals;
+    IntervalLine intervals[0];
+    int intervalMapping[0];
 
     fun @construct(vec3 color, string noteName, int noteDiff, int center, int length, int upperMax) {
         color => this.color;
@@ -99,6 +130,16 @@ public class ColorPane {
 
         center + length => this.upper;
         if (this.upper > upperMax) upperMax => this.upper;
+    }
+
+    fun void addInterval(IntervalLine interval, int connectingPaneIdx) {
+        this.intervals << interval;
+        1 => this.intervalMapping[Std.itoa(connectingPaneIdx)];
+    }
+
+    fun int checkInterval(int connectingPaneIdx) {
+        Std.itoa(connectingPaneIdx) => string key;
+        return this.intervalMapping.isInMap(key);
     }
 }
 
@@ -126,12 +167,14 @@ public class ColorVisualizer extends GGen {
     1 => int BLEND;
     2 => int BLEND_SHOW_CENTER;
     3 => int BLEND_SHOW_NOTE_NAMES;
+    4 => int BLEND_SHOW_INTERVALS;
 
     [
         "Block",
         "Blend",
         "Blend+Center",
         "Blend+Notes",
+        "Blend+Intervals"
     ] @=> string layersText[];
 
     [
@@ -139,6 +182,7 @@ public class ColorVisualizer extends GGen {
         0.2,
         0.15,
         0.15,
+        0.12,
     ] @=> float layersTextScale[];
 
     fun @construct(Tuning tuning) {
@@ -357,8 +401,8 @@ public class ColorVisualizer extends GGen {
             }
         }
 
-        // Blend colors together
-        if (this.layerMode == this.BLEND || this.layerMode == this.BLEND_SHOW_CENTER || this.layerMode == this.BLEND_SHOW_NOTE_NAMES) {
+        // Blend colors together for every mode besides Block Mode
+        if (this.layerMode != this.BLOCK) {
             if (this.activePanes.size() >= 1) {
                 this.activePanes[0] @=> ColorPane pane;
                 this.setColor(pane.color, pane.lower, pane.upper);
@@ -401,15 +445,14 @@ public class ColorVisualizer extends GGen {
         }
 
         // Highlight Center
-        if (this.layerMode == this.BLEND_SHOW_CENTER || this.layerMode == this.BLEND_SHOW_NOTE_NAMES) {
+        if (this.layerMode == this.BLEND_SHOW_CENTER || this.layerMode == this.BLEND_SHOW_NOTE_NAMES || this.layerMode == this.BLEND_SHOW_INTERVALS) {
             for (ColorPane pane : this.activePanes) {
                 this.setColor(pane.color * 3., pane.center - 2, pane.center + 2);
 
                 // Add note names
-                if (this.layerMode == this.BLEND_SHOW_NOTE_NAMES) {
+                if (this.layerMode == this.BLEND_SHOW_NOTE_NAMES || this.layerMode == this.BLEND_SHOW_INTERVALS) {
                     this.shards[pane.center] @=> GPlane shard;
 
-                    // pane.showNote();
                     if (!pane.noteVisuals.visible) {
                         pane.noteVisuals --> this;
 
@@ -418,10 +461,43 @@ public class ColorVisualizer extends GGen {
                         1 => pane.noteVisuals.visible;
                     }
                 } else {
+                    // Otherwise remove note names
                     if (pane.noteVisuals.visible) {
                         pane.noteVisuals --< this;
                         0 => pane.noteVisuals.visible;
                     }
+
+                    // And remove intervals if applicable
+                }
+            }
+        }
+
+        // Add interval information
+        if (this.layerMode == this.BLEND_SHOW_INTERVALS) {
+            // Set intervals between each pairing of panes
+            for (int outerIdx; outerIdx < this.activePanes.size(); outerIdx++) {
+
+                this.activePanes[outerIdx] @=> ColorPane startPane;
+                for (outerIdx + 1 => int innerIdx; innerIdx < this.activePanes.size(); innerIdx++) {
+                    if (startPane.checkInterval(outerIdx)) {
+                        // Interval already exists, skip
+                        continue;
+                    }
+
+                    this.activePanes[innerIdx] @=> ColorPane endPane;
+
+                    // Calculate points
+                    this.shards[startPane.center] @=> GPlane startShard;
+                    this.shards[endPane.center] @=> GPlane endShard;
+
+                    [
+                        @(startShard.posX(), startShard.posY()),
+                        @(endShard.posX(), endShard.posY())
+                    ] @=> vec2 points[];
+
+                    IntervalLine interval("Test", Color.BLACK, points, 0.05);
+                    startPane.addInterval(interval, outerIdx);
+                    interval --> this;
                 }
             }
         }
