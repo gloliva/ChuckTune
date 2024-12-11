@@ -116,7 +116,7 @@ ThemeSelect themeUI;
 while (true) {
     mp.getMouseInfo() @=> MouseInfo mouseInfo;
 
-    mouseInfo.print();
+    // mouseInfo.print();
 
     // Handle Mouse Clicks
     if (mouseInfo.leftDown == 1) {
@@ -221,9 +221,15 @@ while (true) {
         } else if (moveUI.plusButtonPressed == 1) {
             primaryVisualizer.scaleWidth(0.05);
             secondaryVisualizer.scaleWidth(0.05);
+
+            primaryVisualizer.updateNoteScale();
+            secondaryVisualizer.updateNoteScale();
         } else if (moveUI.minusButtonPressed == 1) {
             primaryVisualizer.scaleWidth(-0.05);
             secondaryVisualizer.scaleWidth(-0.05);
+
+            primaryVisualizer.updateNoteScale();
+            secondaryVisualizer.updateNoteScale();
         }
     }
 

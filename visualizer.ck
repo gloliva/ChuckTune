@@ -22,6 +22,7 @@ public class NotePane extends GGen {
     GText noteText;
 
     int visible;
+    float baseScale;
 
     fun @construct(vec3 color, string noteName) {
         // Text
@@ -31,6 +32,7 @@ public class NotePane extends GGen {
         @(0.9, 0.9, 0.9) => this.inner.sca;
         @(0.5, 0.5, 0.5) => this.noteText.sca;
         @(0.25, 0.25, 0.25) => this.sca;
+        0.92 => this.baseScale;
 
         // Position
         0.001 => this.posZ;
@@ -60,18 +62,10 @@ public class NotePane extends GGen {
         z => this.posZ;
     }
 
-    fun void show() {
-        if (!this.visible) {
-            1 => this.visible;
-            this --> GG.scene();
-        }
-    }
-
-    fun void hide() {
-        if (this.visible) {
-            this --< GG.scene();
-            0 => this.visible;
-        }
+    fun void updateSca(float xSca) {
+        // TODO: fix this function
+        (baseScale - xSca) + this.scaX() => this.scaX;
+        xSca => this.baseScale;
     }
 }
 
@@ -105,14 +99,6 @@ public class ColorPane {
 
         center + length => this.upper;
         if (this.upper > upperMax) upperMax => this.upper;
-    }
-
-    fun void showNote() {
-        this.noteVisuals.show();
-    }
-
-    fun void hideNote() {
-        this.noteVisuals.hide();
     }
 }
 
@@ -193,7 +179,6 @@ public class ColorVisualizer extends GGen {
             shard --> this;
         }
 
-        1.0 => this.scaX;
         this --> GG.scene();
         "ColorVisualizer" => this.name;
     }
@@ -252,6 +237,14 @@ public class ColorVisualizer extends GGen {
         diff => this.translateX;
     }
 
+    fun void updateNoteScale() {
+        if (this.layerMode == this.BLEND_SHOW_NOTE_NAMES) {
+            for (ColorPane pane : this.activePanes) {
+                pane.noteVisuals.updateSca(this.scaX());
+            }
+        }
+    }
+
     fun void setHold() {
         1 => this.hold;
     }
@@ -303,9 +296,14 @@ public class ColorVisualizer extends GGen {
         if (this.hold == 1) return;
 
         this.panesMap[key] @=> ColorPane pane;
-        pane.hideNote();
         this.setColor(Color.BLACK, pane.lower, pane.upper);
         this.removePaneToActiveList(pane);
+
+        // Remove pane from scene
+        if (pane.noteVisuals.visible) {
+            pane.noteVisuals --< this;
+            0 => pane.noteVisuals.visible;
+        }
     }
 
     fun void addPaneToActiveList(ColorPane active) {
@@ -352,7 +350,10 @@ public class ColorVisualizer extends GGen {
                 this.setColor(pane.color, pane.lower, pane.upper);
 
                 // Hide note if blend mode changed
-                pane.hideNote();
+                if (pane.noteVisuals.visible) {
+                    pane.noteVisuals --< this;
+                    0 => pane.noteVisuals.visible;
+                }
             }
         }
 
@@ -406,20 +407,21 @@ public class ColorVisualizer extends GGen {
 
                 // Add note names
                 if (this.layerMode == this.BLEND_SHOW_NOTE_NAMES) {
-                    pane.showNote();
                     this.shards[pane.center] @=> GPlane shard;
 
-                    shard.posX() + this.posX() => float xPos;
-                    0. => float xDiff;
-                    if (xPos < 0.) {
-                        Std.scalef(xPos, 0., -6., 0., 0.25) => xDiff;
-                    } else {
-                        Std.scalef(xPos, 0., 6., 0., -0.25) => xDiff;
-                    }
+                    // pane.showNote();
+                    if (!pane.noteVisuals.visible) {
+                        pane.noteVisuals --> this;
 
-                    pane.noteVisuals.setPos(xPos + xDiff, shard.posY() + this.posY(), this.posZ());
+                        ((pane.noteDiff % 5) - 2) * 0.3 => float yDiff;
+                        pane.noteVisuals.setPos(shard.posX(), shard.posY() + yDiff, 0.001);
+                        1 => pane.noteVisuals.visible;
+                    }
                 } else {
-                    pane.hideNote();
+                    if (pane.noteVisuals.visible) {
+                        pane.noteVisuals --< this;
+                        0 => pane.noteVisuals.visible;
+                    }
                 }
             }
         }
