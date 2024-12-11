@@ -1,16 +1,16 @@
 12
-C
-C#
-D
-D#
-E
-F
-F#
-G
-G#
-A
-A#
-B
+C P1
+C# m2
+D M2
+D# m3
+E M3
+F P4
+F# d5
+G P5
+G# m6
+A M6
+A# m7
+B M7
 
 Z 1
 X 3

@@ -1,35 +1,35 @@
 31
-C
-Dbb
-C#
-Db
-Cx
-D
-Ebb
-D#
-Eb
-Dx
-E
-Fb
-E#
-F
-Gbb
-F#
-Gb
-Fx
-G
-Abb
-G#
-Ab
-Gx
-A
-Bbb
-A#
-Bb
-Ax
-B
-Cb
-B#
+C P1
+Dbb ^1
+C# vm2
+Db m2
+Cx ~2
+D M2
+Ebb ^M2
+D# vm3
+Eb m3
+Dx ~3
+E M3
+Fb ^M3
+E# v4
+F P4
+Gbb ~4
+F# A4
+Gb d5
+Fx ~5
+G P5
+Abb ^5
+G# vm6
+Ab m6
+Gx ~6
+A M6
+Bbb ^M6
+A# vm7
+Bb m7
+Ax ~7
+B M7
+Cb ^M7
+B# v8
 
 Z 3
 X 8

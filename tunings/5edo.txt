@@ -1,9 +1,9 @@
 5
-C
-D/E
-F
-G
-A/B
+C P1
+D/E M2/m3
+F P4
+G P5
+A/B M6/m7
 
 Z 1
 X 3

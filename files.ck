@@ -1,6 +1,7 @@
 public class TuningFile {
     string notes[0];
     int noteMapping[0];
+    string intervalMapping[0];
     int keyboardToMidi[0];
     int length;
 
@@ -8,6 +9,10 @@ public class TuningFile {
         this.length => this.noteMapping[note];
         this.length++;
         this.notes << note;
+    }
+
+    fun void addInterval(string interval) {
+        this.intervalMapping << interval;
     }
 
     fun void addKey(string key, int midiDiff) {
@@ -25,6 +30,10 @@ public class TuningFile {
 
     fun int getIdx(string note) {
         return this.noteMapping[note];
+    }
+
+    fun string getInterval(int distance) {
+        return this.intervalMapping[distance % this.length];
     }
 }
 
@@ -48,12 +57,17 @@ public class FileReader {
 
         // Read each line as a word
         repeat ( numNotes ) {
-            fio.readLine() => string word;
+            fio.readLine() => string line;
+
+            StringTokenizer tok;
+            tok.set(line);
+            string note, interval;
+            tok.next( note );
+            tok.next( interval );
 
             // Skip commented out lines
-            if (word.charAt(0) != "#".charAt(0)) {
-                set.addNote(word);
-            }
+            set.addNote(note);
+            set.addInterval(interval);
         }
 
         // Skip empty line

@@ -1,23 +1,23 @@
 19
-C
-C#
-Db
-D
-D#
-Eb
-E
-E#
-F
-F#
-Gb
-G
-G#
-Ab
-A
-A#
-Bb
-B
-B#
+C P1
+C# A1
+Db m2
+D M2
+D# A2
+Eb m3
+E M3
+E# A3
+F P4
+F# A4
+Gb d5
+G P5
+G# A5
+Ab m6
+A M6
+A# A6
+Bb m7
+B M7
+B# A7
 
 Z 2
 X 5

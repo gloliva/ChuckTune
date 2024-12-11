@@ -1,11 +1,11 @@
 7
-C
-D
-E
-F
-G
-A
-B
+C P1
+D vM2
+E ~3
+F P4
+G P5
+A ~6
+B ^m7
 
 Z 1
 X 3
