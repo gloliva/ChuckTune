@@ -2,8 +2,6 @@
 
 
 public class Keyboard {
-
-    int letterToIndex[0];
     string keyboardLayout[4][0];
     int midiBase;
 
@@ -29,6 +27,10 @@ public class Keyboard {
 
     fun int getNoteDiff(string key) {
         return this.tuning.file.keyboardToMidi[key];
+    }
+
+    fun string getNoteName(int keyRow, int keyCol) {
+        return this.visuals.getRow(keyRow).getKey(keyCol).getNote();
     }
 
     fun void updateTuning(Tuning tuning) {
@@ -159,6 +161,10 @@ public class KeyboardKey extends GGen {
     fun void setPosX(float x) {
         x => this.posX;
     }
+
+    fun string getNote() {
+        return this.noteLetter.text();
+    }
 }
 
 
@@ -216,6 +222,10 @@ public class KeyboardRow extends GGen {
 
     fun void releaseKey(int col) {
         this.row[col].release();
+    }
+
+    fun KeyboardKey getKey(int col) {
+        return this.row[col];
     }
 }
 
@@ -279,5 +289,9 @@ public class KeyboardVisuals extends GGen {
 
     fun void releaseKey(int row, int col) {
         this.rows[row].releaseKey(col);
+    }
+
+    fun KeyboardRow getRow(int row) {
+        return this.rows[row];
     }
 }

@@ -4,7 +4,7 @@
     - [x] Freeze Current band to compare to a different tuning (persists across tunings)
         - [x] Instant Hold + Timed Hold
     - [x] Zoom in and out of bands (and scroll)
-    - [ ] Show band from different tuning at same time as current band (in-real time)
+    - [ ] Track band from different tuning at same time as current band in-real time (pick closest notes)
     - [ ] Add a blend mode that shows Note names
     - [ ] Add a blend mode that shows interval names between notes
     - [ ] Envelope color when going to and from black
@@ -109,7 +109,6 @@ MoveVisualizer moveUI;
 
 
 while (true) {
-    kp.getKeyPress() @=> Key keysDown[];
     mp.getMouseInfo() @=> MouseInfo mouseInfo;
 
     // Handle Mouse Clicks
@@ -205,20 +204,24 @@ while (true) {
     }
 
     // Handle Key presses
+    kp.getKeyPress() @=> Key keysDown[];
     for (Key key : keysDown) {
+        // Set frequency
         kb.getFreq(key.key) => float freq;
         inst.voiceOn(key.key, freq);
 
+        // Handle key press
         colorMapper.freqToColor( register, freq ) @=> vec3 keyColor;
         kb.visuals.setKeyColor(keyColor, Color.WHITE * 4, key.keyRow, key.keyCol);
         kb.visuals.pressKey(key.keyRow, key.keyCol);
 
+        // Map to visual spectrum
         colorMapper.freqToShard( register, freq ) => int shardCenter;
+        kb.getNoteName(key.keyRow, key.keyCol) => string note;
         kb.getNoteDiff(key.key) => int noteDiff;
-        primaryVisualizer.addPane(key.key, keyColor, shardCenter, noteDiff);
-        secondaryVisualizer.addPane(key.key, keyColor, shardCenter, noteDiff);
+        primaryVisualizer.addPane(key.key, keyColor, shardCenter, note, noteDiff);
+        secondaryVisualizer.addPane(key.key, keyColor, shardCenter, note, noteDiff);
     }
-
 
     kp.getKeyRelease() @=> Key keysUp[];
     for (Key key : keysUp) {
@@ -234,9 +237,9 @@ while (true) {
 
     GG.nextFrame() => now;
     // UI
-    // if (UI.begin("ChuckTune")) {
-    //     // show a UI display of the current scenegraph
-    //     UI.scenegraph(GG.scene());
-    // }
-    // UI.end();
+    if (UI.begin("ChuckTune")) {
+        // show a UI display of the current scenegraph
+        UI.scenegraph(GG.scene());
+    }
+    UI.end();
 }

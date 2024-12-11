@@ -16,18 +16,86 @@ TODO:
 @import "ui.ck"
 
 
+public class NotePane extends GGen {
+    GPlane border;
+    GPlane inner;
+    GText noteText;
+
+    int visible;
+
+    fun @construct(vec3 color, string noteName) {
+        // Text
+        noteName => this.noteText.text;
+
+        // Scale
+        @(0.9, 0.9, 0.9) => this.inner.sca;
+        @(0.5, 0.5, 0.5) => this.noteText.sca;
+        @(0.25, 0.25, 0.25) => this.sca;
+
+        // Position
+        0.001 => this.posZ;
+        0.001 => this.inner.posZ;
+        0.002 => this.noteText.posZ;
+
+        // Color
+        color => this.inner.color;
+        Color.WHITE * 4. => this.border.color;
+        @(4., 4., 4., 1.) => this.noteText.color;
+
+        // Name
+        "Border" => this.border.name;
+        "Inside" => this.inner.name;
+        "Note Text" => this.noteText.name;
+        "Note Pane" => this.name;
+
+        // Connections
+        this.border --> this;
+        this.inner --> this;
+        this.noteText --> this.inner;
+    }
+
+    fun void setPos(float x, float y, float z) {
+        x => this.posX;
+        y => this.posY;
+        z => this.posZ;
+    }
+
+    fun void show() {
+        if (!this.visible) {
+            1 => this.visible;
+            this --> GG.scene();
+        }
+    }
+
+    fun void hide() {
+        if (this.visible) {
+            this --< GG.scene();
+            0 => this.visible;
+        }
+    }
+}
+
+
 public class ColorPane {
     vec3 color;
+    string noteName;
     int noteDiff;
 
+    // Visualizer position
     int center;
     int lower;
     int upper;
 
+    // Visuals
+    NotePane @ noteVisuals;
 
-    fun @construct(vec3 color, int noteDiff, int center, int length, int upperMax) {
+    fun @construct(vec3 color, string noteName, int noteDiff, int center, int length, int upperMax) {
         color => this.color;
+        noteName => this.noteName;
         noteDiff => this.noteDiff;
+
+        // Visuals
+        new NotePane(color, noteName) @=> this.noteVisuals;
 
         // Indexing
         center => this.center;
@@ -37,6 +105,14 @@ public class ColorPane {
 
         center + length => this.upper;
         if (this.upper > upperMax) upperMax => this.upper;
+    }
+
+    fun void showNote() {
+        this.noteVisuals.show();
+    }
+
+    fun void hideNote() {
+        this.noteVisuals.hide();
     }
 }
 
@@ -63,16 +139,19 @@ public class ColorVisualizer extends GGen {
     0 => int BLOCK;
     1 => int BLEND;
     2 => int BLEND_SHOW_CENTER;
+    3 => int BLEND_SHOW_NOTE_NAMES;
 
     [
         "Block",
         "Blend",
         "Blend+Center",
+        "Blend+Notes",
     ] @=> string layersText[];
 
     [
         0.2,
         0.2,
+        0.15,
         0.15,
     ] @=> float layersTextScale[];
 
@@ -209,11 +288,11 @@ public class ColorVisualizer extends GGen {
         return new Text(text, scale);
     }
 
-    fun void addPane(string key, vec3 color, int shardCenter, int noteDiff) {
+    fun void addPane(string key, vec3 color, int shardCenter, string noteName, int noteDiff) {
         // Skip if in hold mode
         if (this.hold == 1) return;
 
-        ColorPane pane(color, noteDiff, shardCenter, 125, this.shards.size());
+        ColorPane pane(color, noteName, noteDiff, shardCenter, 125, this.shards.size());
         this.addPaneToActiveList(pane);
 
         pane @=> this.panesMap[key];
@@ -224,6 +303,7 @@ public class ColorVisualizer extends GGen {
         if (this.hold == 1) return;
 
         this.panesMap[key] @=> ColorPane pane;
+        pane.hideNote();
         this.setColor(Color.BLACK, pane.lower, pane.upper);
         this.removePaneToActiveList(pane);
     }
@@ -270,10 +350,14 @@ public class ColorVisualizer extends GGen {
         if (this.layerMode == this.BLOCK) {
             for (ColorPane pane : this.activePanes) {
                 this.setColor(pane.color, pane.lower, pane.upper);
+
+                // Hide note if blend mode changed
+                pane.hideNote();
             }
         }
 
-        if (this.layerMode == this.BLEND || this.layerMode == this.BLEND_SHOW_CENTER) {
+        // Blend colors together
+        if (this.layerMode == this.BLEND || this.layerMode == this.BLEND_SHOW_CENTER || this.layerMode == this.BLEND_SHOW_NOTE_NAMES) {
             if (this.activePanes.size() >= 1) {
                 this.activePanes[0] @=> ColorPane pane;
                 this.setColor(pane.color, pane.lower, pane.upper);
@@ -315,9 +399,28 @@ public class ColorVisualizer extends GGen {
             }
         }
 
-        if (this.layerMode == this.BLEND_SHOW_CENTER) {
+        // Highlight Center
+        if (this.layerMode == this.BLEND_SHOW_CENTER || this.layerMode == this.BLEND_SHOW_NOTE_NAMES) {
             for (ColorPane pane : this.activePanes) {
                 this.setColor(pane.color * 3., pane.center - 2, pane.center + 2);
+
+                // Add note names
+                if (this.layerMode == this.BLEND_SHOW_NOTE_NAMES) {
+                    pane.showNote();
+                    this.shards[pane.center] @=> GPlane shard;
+
+                    shard.posX() + this.posX() => float xPos;
+                    0. => float xDiff;
+                    if (xPos < 0.) {
+                        Std.scalef(xPos, 0., -6., 0., 0.25) => xDiff;
+                    } else {
+                        Std.scalef(xPos, 0., 6., 0., -0.25) => xDiff;
+                    }
+
+                    pane.noteVisuals.setPos(xPos + xDiff, shard.posY() + this.posY(), this.posZ());
+                } else {
+                    pane.hideNote();
+                }
             }
         }
     }
