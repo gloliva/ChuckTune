@@ -32,6 +32,16 @@ public class TuningFile {
         return this.noteMapping[note];
     }
 
+    fun string getIntervalBetweenNotes(int lowerIdx, int upperIdx) {
+        if (lowerIdx < 0) {
+            upperIdx - lowerIdx => upperIdx;
+            0 => lowerIdx;
+        }
+
+        upperIdx - lowerIdx => int distance;
+        return this.getInterval(distance);
+    }
+
     fun string getInterval(int distance) {
         return this.intervalMapping[distance % this.length];
     }

@@ -125,8 +125,13 @@ while (true) {
 
         if (tuningSelectMode != 0) {
             tuningManager.changeTuning(tuningSelectMode);
-            kb.updateTuning(tuningManager.getTuning());
-            tuningUI.setText(tuningManager.getTuning().name);
+            tuningManager.getTuning() @=> Tuning newTuning;
+
+            // Update everything with new tuning
+            kb.updateTuning(newTuning);
+            primaryVisualizer.setTuning(newTuning);
+            secondaryVisualizer.setTuning(newTuning);
+            tuningUI.setText(newTuning.name);
         }
 
         if (tuningSelectMode == -1) tuningUI.clickLeft();

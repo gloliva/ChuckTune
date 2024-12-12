@@ -25,14 +25,18 @@ public class NotePane extends GGen {
     float initialXScale;
 
     fun @construct(vec3 color, string noteName) {
+        NotePane(color, noteName, 0.25);
+    }
+
+    fun @construct(vec3 color, string noteName, float initScale) {
         // Text
         noteName => this.noteText.text;
 
         // Scale
         @(0.9, 0.9, 0.9) => this.inner.sca;
         @(0.5, 0.5, 0.5) => this.noteText.sca;
-        @(0.25, 0.25, 0.25) => this.sca;
-        0.25 => this.initialXScale;
+        @(initScale, initScale, initScale) => this.sca;
+        initScale => this.initialXScale;
 
         // Position
         0.001 => this.posZ;
@@ -78,7 +82,7 @@ public class IntervalLine extends GGen {
         points => this.line.positions;
 
         // Setup interval
-        new NotePane(color, intervalName) @=> this.intervalPane;
+        new NotePane(color, intervalName, 0.18) @=> this.intervalPane;
 
         // Position
         0.01 => this.posZ;
@@ -155,11 +159,21 @@ public class ColorPane {
         return this.intervalMapping.isInMap(key);
     }
 
+    fun IntervalLine getInterval(int connectingPaneIdx) {
+        return this.intervals[connectingPaneIdx - 1];
+    }
+
     fun void removeInterval(int connectingPaneIdx) {
         if (this.checkInterval(connectingPaneIdx)) {
             Std.itoa(connectingPaneIdx) => string key;
-            this.intervals.erase(key);
+            this.intervalMapping.erase(key);
+            this.intervals.erase(connectingPaneIdx - 1);
         }
+    }
+
+    fun void clearIntervals() {
+        this.intervals.clear();
+        this.intervalMapping.clear();
     }
 }
 
@@ -180,7 +194,6 @@ public class ColorVisualizer extends GGen {
 
     // Tuning
     Tuning @ tuning;
-    int steps;
 
     // Layers
     0 => int BLOCK;
@@ -208,7 +221,6 @@ public class ColorVisualizer extends GGen {
     fun @construct(Tuning tuning) {
         // Tuning
         tuning @=> this.tuning;
-        tuning.file.length => this.steps;
         12 => this.activePanes.capacity;
         1 => this.layerMode;
 
@@ -245,6 +257,10 @@ public class ColorVisualizer extends GGen {
 
         this --> GG.scene();
         "ColorVisualizer" => this.name;
+    }
+
+    fun void setTuning(Tuning tuning) {
+        tuning @=> this.tuning;
     }
 
     fun void setColorGradient(vec3 leftColor, vec3 rightColor) {
@@ -363,7 +379,19 @@ public class ColorVisualizer extends GGen {
         this.panesMap[key] @=> ColorPane pane;
         this.setColor(Color.BLACK, pane.lower, pane.upper);
 
-        // Remove intervals connected to this pane
+        if (this.layerMode == this.BLEND_SHOW_INTERVALS) {
+            // Remove intervals connected to this pane
+            for (int idx; idx < pane.panelIdx; idx++) {
+                this.activePanes[idx].getInterval(pane.panelIdx) --< this;
+                this.activePanes[idx].removeInterval(pane.panelIdx);
+            }
+
+            // Remove intervals this pane is connected to
+            for (IntervalLine line : pane.intervals) {
+                line --< this;
+            }
+            pane.clearIntervals();
+        }
 
         // Remove from active panels list
         this.removePaneToActiveList(pane);
@@ -500,8 +528,6 @@ public class ColorVisualizer extends GGen {
                         pane.noteVisuals --< this;
                         0 => pane.noteVisuals.visible;
                     }
-
-                    // And remove intervals if applicable
                 }
             }
         }
@@ -529,7 +555,8 @@ public class ColorVisualizer extends GGen {
                         @(endShard.posX(), endShard.posY())
                     ] @=> vec2 points[];
 
-                    IntervalLine interval("Test", Color.BLACK, points, 0.05);
+                    this.tuning.file.getIntervalBetweenNotes(startPane.noteDiff, endPane.noteDiff) => string intervalName;
+                    IntervalLine interval(intervalName, Color.BLACK, points, 0.05);
                     startPane.addInterval(interval, outerIdx);
                     startPane.updateVisualScale(this.scaX());
                     interval --> this;
