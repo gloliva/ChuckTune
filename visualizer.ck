@@ -77,7 +77,11 @@ public class IntervalLine extends GGen {
     GLines line;
     NotePane @ intervalPane;
 
+    string intervalName;
+
     fun @construct(string intervalName, Theme theme, vec2 points[], float width) {
+        intervalName => this.intervalName;
+
         // Setup lines
         width => this.line.width;
         points => this.line.positions;
@@ -124,6 +128,7 @@ public class ColorPane {
     NotePane @ noteVisuals;
     IntervalLine intervals[0];
     int intervalMapping[0];
+    int numIntervals;
 
     fun @construct(vec3 color, string noteName, int noteDiff, int center, int length, int upperMax) {
         color => this.color;
@@ -163,26 +168,35 @@ public class ColorPane {
         }
     }
 
-    fun void addInterval(IntervalLine interval, int connectingPaneIdx) {
+    fun void addInterval(IntervalLine interval, string intervalName) {
         this.intervals << interval;
-        1 => this.intervalMapping[Std.itoa(connectingPaneIdx)];
+        this.numIntervals => this.intervalMapping[intervalName];
+        this.numIntervals++;
     }
 
-    fun int checkInterval(int connectingPaneIdx) {
-        Std.itoa(connectingPaneIdx) => string key;
-        return this.intervalMapping.isInMap(key);
+    fun int checkInterval(string intervalName) {
+        return this.intervalMapping.isInMap(intervalName);
     }
 
-    fun IntervalLine getInterval(int connectingPaneIdx) {
-        return this.intervals[connectingPaneIdx - 1];
+    fun IntervalLine getInterval(string intervalName) {
+        this.intervalMapping[intervalName] => int idx;
+        return this.intervals[idx];
     }
 
-    fun void removeInterval(int connectingPaneIdx) {
-        if (this.checkInterval(connectingPaneIdx)) {
-            Std.itoa(connectingPaneIdx) => string key;
-            this.intervalMapping.erase(key);
-            this.intervals.erase(connectingPaneIdx - 1);
+    fun void removeInterval(string intervalName) {
+        if (this.checkInterval(intervalName)) {
+            this.intervalMapping[intervalName] => int idx;
+            this.intervalMapping.erase(intervalName);
+            this.intervals.erase(idx);
+            this.numIntervals--;
+
+            // Remap interval name to list idx
+            for (int idx; idx < this.numIntervals; idx++) {
+                this.intervals[idx] @=> IntervalLine interval;
+                idx => this.intervalMapping[interval.intervalName];
+            }
         }
+
     }
 
     fun void clearIntervals() {
@@ -407,8 +421,11 @@ public class ColorVisualizer extends GGen {
         if (this.layerMode == this.BLEND_SHOW_INTERVALS) {
             // Remove intervals connected to this pane
             for (int idx; idx < pane.panelIdx; idx++) {
-                this.activePanes[idx].getInterval(pane.panelIdx) --< this;
-                this.activePanes[idx].removeInterval(pane.panelIdx);
+                this.activePanes[idx] @=> ColorPane lowerPane;
+                this.tuning.file.getIntervalBetweenNotes(lowerPane.noteDiff, pane.noteDiff) => string intervalName;
+
+                lowerPane.getInterval(intervalName) --< this;
+                lowerPane.removeInterval(intervalName);
             }
 
             // Remove intervals this pane is connected to
@@ -583,7 +600,7 @@ public class ColorVisualizer extends GGen {
                     ] @=> vec2 points[];
 
                     IntervalLine interval(intervalName, this.theme, points, 0.05);
-                    startPane.addInterval(interval, innerIdx);
+                    startPane.addInterval(interval, intervalName);
                     startPane.updateVisualScale(this.scaX());
                     interval --> this;
                 }
