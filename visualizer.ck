@@ -22,7 +22,7 @@ public class NotePane extends GGen {
     GText noteText;
 
     int visible;
-    float baseScale;
+    float initialXScale;
 
     fun @construct(vec3 color, string noteName) {
         // Text
@@ -32,7 +32,7 @@ public class NotePane extends GGen {
         @(0.9, 0.9, 0.9) => this.inner.sca;
         @(0.5, 0.5, 0.5) => this.noteText.sca;
         @(0.25, 0.25, 0.25) => this.sca;
-        0.92 => this.baseScale;
+        0.25 => this.initialXScale;
 
         // Position
         0.001 => this.posZ;
@@ -62,10 +62,8 @@ public class NotePane extends GGen {
         z => this.posZ;
     }
 
-    fun void updateSca(float xSca) {
-        // TODO: fix this function
-        (baseScale - xSca) + this.scaX() => this.scaX;
-        xSca => this.baseScale;
+    fun void updateScale(float visualizerXScale) {
+        this.initialXScale / visualizerXScale => this.scaX;
     }
 }
 
@@ -103,6 +101,7 @@ public class ColorPane {
     vec3 color;
     string noteName;
     int noteDiff;
+    int panelIdx;
 
     // Visualizer position
     int center;
@@ -119,6 +118,9 @@ public class ColorPane {
         noteName => this.noteName;
         noteDiff => this.noteDiff;
 
+        // Active Panel IDX not set
+        -1 => this.panelIdx;
+
         // Visuals
         new NotePane(color, noteName) @=> this.noteVisuals;
 
@@ -132,6 +134,17 @@ public class ColorPane {
         if (this.upper > upperMax) upperMax => this.upper;
     }
 
+    fun void setPanelIdx(int idx) {
+        idx => this.panelIdx;
+    }
+
+    fun updateVisualScale(float visualizerXScale) {
+        this.noteVisuals.updateScale(visualizerXScale);
+        for (IntervalLine line : this.intervals) {
+            line.intervalPane.updateScale(visualizerXScale);
+        }
+    }
+
     fun void addInterval(IntervalLine interval, int connectingPaneIdx) {
         this.intervals << interval;
         1 => this.intervalMapping[Std.itoa(connectingPaneIdx)];
@@ -140,6 +153,13 @@ public class ColorPane {
     fun int checkInterval(int connectingPaneIdx) {
         Std.itoa(connectingPaneIdx) => string key;
         return this.intervalMapping.isInMap(key);
+    }
+
+    fun void removeInterval(int connectingPaneIdx) {
+        if (this.checkInterval(connectingPaneIdx)) {
+            Std.itoa(connectingPaneIdx) => string key;
+            this.intervals.erase(key);
+        }
     }
 }
 
@@ -282,9 +302,9 @@ public class ColorVisualizer extends GGen {
     }
 
     fun void updateNoteScale() {
-        if (this.layerMode == this.BLEND_SHOW_NOTE_NAMES) {
+        if (this.layerMode == this.BLEND_SHOW_NOTE_NAMES || this.layerMode == this.BLEND_SHOW_INTERVALS) {
             for (ColorPane pane : this.activePanes) {
-                pane.noteVisuals.updateSca(this.scaX());
+                pane.updateVisualScale(this.scaX());
             }
         }
     }
@@ -330,6 +350,7 @@ public class ColorVisualizer extends GGen {
         if (this.hold == 1) return;
 
         ColorPane pane(color, noteName, noteDiff, shardCenter, 125, this.shards.size());
+        pane.updateVisualScale(this.scaX());
         this.addPaneToActiveList(pane);
 
         pane @=> this.panesMap[key];
@@ -341,9 +362,13 @@ public class ColorVisualizer extends GGen {
 
         this.panesMap[key] @=> ColorPane pane;
         this.setColor(Color.BLACK, pane.lower, pane.upper);
+
+        // Remove intervals connected to this pane
+
+        // Remove from active panels list
         this.removePaneToActiveList(pane);
 
-        // Remove pane from scene
+        // Remove NotePane from scene
         if (pane.noteVisuals.visible) {
             pane.noteVisuals --< this;
             0 => pane.noteVisuals.visible;
@@ -365,17 +390,21 @@ public class ColorVisualizer extends GGen {
         // shift other panes over by 1
         this.activePanes.size() + 1 => this.activePanes.size;
         for (this.activePanes.size() - 1 => int idx; idx > activeIdx; idx--) {
+
+            // Update PanelIdx
             this.activePanes[idx - 1] @=> this.activePanes[idx];
+            this.activePanes[idx].setPanelIdx(idx);
         }
 
         // set active
+        active.setPanelIdx(activeIdx);
         active @=> this.activePanes[activeIdx];
     }
 
     fun void removePaneToActiveList(ColorPane active) {
         0 => int activeIdx;
 
-        // find where to insert pane
+        // find where to remove pane
         while (activeIdx < this.activePanes.size()) {
             if (active.noteDiff == this.activePanes[activeIdx].noteDiff) {
                 this.activePanes.popOut(activeIdx);
@@ -383,6 +412,11 @@ public class ColorVisualizer extends GGen {
             }
 
             activeIdx++;
+        }
+
+        // Update Panel IDX for each pane
+        for (int idx; idx < this.activePanes.size(); idx++) {
+            this.activePanes[idx].setPanelIdx(idx);
         }
     }
 
@@ -497,6 +531,7 @@ public class ColorVisualizer extends GGen {
 
                     IntervalLine interval("Test", Color.BLACK, points, 0.05);
                     startPane.addInterval(interval, outerIdx);
+                    startPane.updateVisualScale(this.scaX());
                     interval --> this;
                 }
             }
