@@ -13,6 +13,7 @@ TODO:
 */
 
 @import "background.ck"
+@import "themes.ck"
 @import "ui.ck"
 
 
@@ -39,9 +40,9 @@ public class NotePane extends GGen {
         initScale => this.initialXScale;
 
         // Position
-        0.001 => this.posZ;
-        0.001 => this.inner.posZ;
-        0.002 => this.noteText.posZ;
+        0.005 => this.posZ;
+        0.002 => this.inner.posZ;
+        0.003 => this.noteText.posZ;
 
         // Color
         color => this.inner.color;
@@ -76,19 +77,21 @@ public class IntervalLine extends GGen {
     GLines line;
     NotePane @ intervalPane;
 
-    fun @construct(string intervalName, vec3 color, vec2 points[], float width) {
+    fun @construct(string intervalName, Theme theme, vec2 points[], float width) {
         // Setup lines
         width => this.line.width;
         points => this.line.positions;
+        theme.secondary => this.line.color;
 
         // Setup interval
-        new NotePane(color, intervalName, 0.18) @=> this.intervalPane;
+        new NotePane(theme.primary, intervalName, 0.18) @=> this.intervalPane;
 
         // Position
-        0.01 => this.posZ;
+        0.001 => this.posZ;
 
         (points[1].x + points[0].x) / 2. => float xPos;
         xPos => this.intervalPane.posX;
+        Math.random2f(-0.5, 0.5) => this.posY;
 
         // Names
         "Line" => this.line.name;
@@ -97,6 +100,11 @@ public class IntervalLine extends GGen {
         // Connections
         this.line --> this;
         this.intervalPane --> this;
+    }
+
+    fun updateTheme(Theme theme) {
+        theme.primary => this.intervalPane.inner.color;
+        theme.secondary => this.line.color;
     }
 }
 
@@ -149,6 +157,12 @@ public class ColorPane {
         }
     }
 
+    fun updateTheme(Theme theme) {
+        for (IntervalLine line : this.intervals) {
+            line.updateTheme(theme);
+        }
+    }
+
     fun void addInterval(IntervalLine interval, int connectingPaneIdx) {
         this.intervals << interval;
         1 => this.intervalMapping[Std.itoa(connectingPaneIdx)];
@@ -194,6 +208,9 @@ public class ColorVisualizer extends GGen {
 
     // Tuning
     Tuning @ tuning;
+
+    // Theme
+    Theme @ theme;
 
     // Layers
     0 => int BLOCK;
@@ -261,6 +278,14 @@ public class ColorVisualizer extends GGen {
 
     fun void setTuning(Tuning tuning) {
         tuning @=> this.tuning;
+    }
+
+    fun void setTheme(Theme theme) {
+        theme @=> this.theme;
+
+        for (ColorPane pane : this.activePanes) {
+            pane.updateTheme(theme);
+        }
     }
 
     fun void setColorGradient(vec3 leftColor, vec3 rightColor) {
@@ -539,12 +564,14 @@ public class ColorVisualizer extends GGen {
 
                 this.activePanes[outerIdx] @=> ColorPane startPane;
                 for (outerIdx + 1 => int innerIdx; innerIdx < this.activePanes.size(); innerIdx++) {
-                    if (startPane.checkInterval(outerIdx)) {
+                    this.activePanes[innerIdx] @=> ColorPane endPane;
+                    this.tuning.file.getIntervalBetweenNotes(startPane.noteDiff, endPane.noteDiff) => string intervalName;
+
+                    if (startPane.checkInterval(intervalName)) {
                         // Interval already exists, skip
                         continue;
                     }
 
-                    this.activePanes[innerIdx] @=> ColorPane endPane;
 
                     // Calculate points
                     this.shards[startPane.center] @=> GPlane startShard;
@@ -555,9 +582,8 @@ public class ColorVisualizer extends GGen {
                         @(endShard.posX(), endShard.posY())
                     ] @=> vec2 points[];
 
-                    this.tuning.file.getIntervalBetweenNotes(startPane.noteDiff, endPane.noteDiff) => string intervalName;
-                    IntervalLine interval(intervalName, Color.BLACK, points, 0.05);
-                    startPane.addInterval(interval, outerIdx);
+                    IntervalLine interval(intervalName, this.theme, points, 0.05);
+                    startPane.addInterval(interval, innerIdx);
                     startPane.updateVisualScale(this.scaX());
                     interval --> this;
                 }

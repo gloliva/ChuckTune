@@ -102,6 +102,8 @@ MousePoller mp;
 
 // Themes
 ThemeManager themes;
+primaryVisualizer.setTheme(themes.getTheme());
+secondaryVisualizer.setTheme(themes.getTheme());
 
 // UI
 Title title;
@@ -200,6 +202,10 @@ while (true) {
 
             // Update theme for keyboard
             kb.setTheme(currTheme);
+
+            // Visualizer theme
+            primaryVisualizer.setTheme(currTheme);
+            secondaryVisualizer.setTheme(currTheme);
 
             // Update background color
             blockLeft.setTheme(currTheme.background);
