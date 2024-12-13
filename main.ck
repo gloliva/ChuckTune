@@ -174,14 +174,22 @@ while (true) {
         // Hold visualizer
         holdUI.checkIfSelected(mouseInfo.pos) => int holdSelectMode;
 
-        if (holdSelectMode == holdUI.HOLD_PRESS) {
+        if (holdSelectMode == holdUI.HOLD_PRESS && holdUI.trackPressed == 0) {
             holdUI.toggleHold();
             if (holdUI.holdPressed == 1) spork ~ secondaryVisualizer.setHold(holdUI.waitTime);
             if (holdUI.holdPressed == 0) {
                 secondaryVisualizer.releaseHold();
                 secondaryVisualizer.setTuning(tuningManager.getTuning());
             }
-        } else if (holdSelectMode != 0 && holdSelectMode != holdUI.HOLD_PRESS) {
+        } else if (holdSelectMode == holdUI.TRACK_PRESS && holdUI.holdPressed == 0) {
+            // track
+            holdUI.toggleTrack();
+            if (holdUI.trackPressed == 1) secondaryVisualizer.setTrack();
+            if (holdUI.trackPressed == 0) {
+                secondaryVisualizer.releaseTrack();
+                secondaryVisualizer.setTuning(tuningManager.getTuning());
+            }
+        } else if (holdSelectMode != 0 && holdSelectMode != holdUI.HOLD_PRESS && holdSelectMode != holdUI.TRACK_PRESS) {
             holdUI.resetTime();
             holdUI.updateTime(holdSelectMode);
         }
@@ -283,7 +291,15 @@ while (true) {
         kb.getNoteName(key.keyRow, key.keyCol) => string note;
         kb.getNoteDiff(key.key) => int noteDiff;
         primaryVisualizer.addPane(key.key, keyColor, shardCenter, note, noteDiff);
-        secondaryVisualizer.addPane(key.key, keyColor, shardCenter, note, noteDiff);
+
+        // Handle secondary Visualizer
+        kb.getFreq(key.key, secondaryVisualizer.tuning) => float secondFreq;
+        colorMapper.freqToColor( register, secondFreq ) @=> vec3 secondKeyColor;
+        colorMapper.freqToShard( register, secondFreq ) => int secondShardCenter;
+        kb.getNoteName(key.keyRow, key.keyCol, secondaryVisualizer.tuning) => string secondNote;
+        kb.getNoteDiff(key.key, secondaryVisualizer.tuning) => int secondNoteDiff;
+
+        secondaryVisualizer.addPane(key.key, secondKeyColor, secondShardCenter, secondNote, secondNoteDiff);
     }
 
     kp.getKeyRelease() @=> Key keysUp[];

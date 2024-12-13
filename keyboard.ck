@@ -17,21 +17,33 @@ public class Keyboard {
         this.setUpVisuals();
     }
 
-    fun int getMidiNote(string key) {
-        return this.midiBase + this.tuning.file.keyboardToMidi[key];
-    }
-
     fun float getFreq(string key) {
         this.getNoteDiff(key) => int midiDiff;
         return this.tuning.freq(midiDiff);
+    }
+
+    fun float getFreq(string key, Tuning tuning) {
+        this.getNoteDiff(key, tuning) => int midiDiff;
+        return tuning.freq(midiDiff);
     }
 
     fun int getNoteDiff(string key) {
         return this.tuning.file.keyboardToMidi[key];
     }
 
+    fun int getNoteDiff(string key, Tuning tuning) {
+        return tuning.file.keyboardToMidi[key];
+    }
+
     fun string getNoteName(int keyRow, int keyCol) {
         return this.visuals.getRow(keyRow).getKey(keyCol).getNote();
+    }
+
+    fun string getNoteName(int keyRow, int keyCol, Tuning tuning) {
+        this.keyboardLayout[keyRow][keyCol] => string key;
+        tuning.file.keyboardToMidi[key] => int idx;
+        tuning.file.get(idx) => string note;
+        return note;
     }
 
     fun void updateTuning(Tuning tuning) {

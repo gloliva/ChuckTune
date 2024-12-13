@@ -438,13 +438,19 @@ public class HoldVisualizer extends GGen {
     GCube holdBorder;
     GPlane holdInside;
 
+    GText track;
+    GCube trackBorder;
+    GPlane trackInside;
+
     int holdPressed;
+    int trackPressed;
     int currTimeSelected;
     int timeButtonPressed;
     dur waitTime;
 
     // Constants
     1 => int HOLD_PRESS;
+    5 => int TRACK_PRESS;
     2 => int NOW_PRESS;
     3 => int SEC2_PRESS;
     4 => int SEC5_PRESS;
@@ -454,29 +460,37 @@ public class HoldVisualizer extends GGen {
         @(1.5, 1., 0.05) => this.border.sca;
         @(1.4, 0.9, 0.9) => this.inside.sca;
 
-        @(0.2, 0.2, 0.2) => this.nowTime.sca;
+        @(0.17, 0.17, 0.17) => this.nowTime.sca;
         @(0.4, 0.25, 0.05) => this.nowBorder.sca;
         @(0.95, 0.9, 0.9) => this.nowInside.sca;
 
-        @(0.2, 0.2, 0.2) => this.sec2Time.sca;
+        @(0.17, 0.17, 0.17) => this.sec2Time.sca;
         @(0.4, 0.25, 0.05) => this.sec2Border.sca;
         @(0.95, 0.9, 0.9) => this.sec2Inside.sca;
 
-        @(0.2, 0.2, 0.2) => this.sec5Time.sca;
+        @(0.17, 0.17, 0.17) => this.sec5Time.sca;
         @(0.4, 0.25, 0.05) => this.sec5Border.sca;
         @(0.95, 0.9, 0.9) => this.sec5Inside.sca;
 
-        @(0.3, 0.3, 0.3) => this.hold.sca;
-        @(1.2, 0.35, 0.05) => this.holdBorder.sca;
+        @(0.17, 0.17, 0.17) => this.hold.sca;
+        @(0.6, 0.35, 0.05) => this.holdBorder.sca;
         @(0.98, 0.9, 0.9) => this.holdInside.sca;
+
+        @(0.17, 0.17, 0.17) => this.track.sca;
+        @(0.6, 0.35, 0.05) => this.trackBorder.sca;
+        @(0.98, 0.9, 0.9) => this.trackInside.sca;
 
         // Position
         -0.025 => this.border.posZ;
         0.001 => this.inside.posZ;
 
-        @(0, 0.15, 0.0251) => this.hold.pos;
-        @(0, 0.15, 0) => this.holdBorder.pos;
+        @(-0.330, 0.15, 0.0251) => this.hold.pos;
+        @(-0.330, 0.15, 0) => this.holdBorder.pos;
         0.501 => this.holdInside.posZ;
+
+        @(0.350, 0.15, 0.0251) => this.track.pos;
+        @(0.350, 0.15, 0) => this.trackBorder.pos;
+        0.501 => this.trackInside.posZ;
 
         @(-0.45, -0.25, 0.0251) => this.nowTime.pos;
         @(-0.45, -0.25, 0) => this.nowBorder.pos;
@@ -494,6 +508,7 @@ public class HoldVisualizer extends GGen {
 
         // Text
         "HOLD" => this.hold.text;
+        "TRACK" => this.track.text;
         "Now" => this.nowTime.text;
         "2s" => this.sec2Time.text;
         "5s" => this.sec5Time.text;
@@ -504,14 +519,17 @@ public class HoldVisualizer extends GGen {
         Color.WHITE * 2. => this.sec2Border.color;
         Color.WHITE * 2. => this.sec5Border.color;
         Color.WHITE * 2. => this.holdBorder.color;
+        Color.WHITE * 2. => this.trackBorder.color;
 
         Color.BLACK => this.inside.color;
         Color.BLACK => this.nowInside.color;
         Color.BLACK => this.sec2Inside.color;
         Color.BLACK => this.sec5Inside.color;
         Color.BLACK => this.holdInside.color;
+        Color.BLACK => this.trackInside.color;
 
         @(2., 2., 2., 1.) => this.hold.color;
+        @(2., 2., 2., 1.) => this.track.color;
 
         // Name
         "Border" => this.border.name;
@@ -532,6 +550,10 @@ public class HoldVisualizer extends GGen {
         "Hold" => this.hold.name;
         "Hold Border" => this.holdBorder.name;
         "Hold Inside" => this.holdInside.name;
+
+        "Track" => this.track.name;
+        "Track Border" => this.trackBorder.name;
+        "Track Inside" => this.trackInside.name;
 
         "Hold UI" => this.name;
 
@@ -555,6 +577,9 @@ public class HoldVisualizer extends GGen {
         hold --> this;
         holdInside --> holdBorder --> this;
 
+        track --> this;
+        trackInside --> trackBorder --> this;
+
         this --> GG.scene();
     }
 
@@ -562,7 +587,8 @@ public class HoldVisualizer extends GGen {
         0 => int selectMode;
 
         if (mousePos.y >= 671 && mousePos.y <= 738) {
-            if (mousePos.x >= 38 && mousePos.x <= 294) this.HOLD_PRESS => selectMode;
+            if (mousePos.x >= 30 && mousePos.x <= 157) this.HOLD_PRESS => selectMode;
+            if (mousePos.x >= 177 && mousePos.x <= 305) this.TRACK_PRESS => selectMode;
         }
 
         if (mousePos.y >= 767 && mousePos.y <= 815) {
@@ -609,6 +635,32 @@ public class HoldVisualizer extends GGen {
 
         this.hold.posZ() + 0.02 => this.hold.posZ;
         this.holdBorder.posZ() + 0.02 => this.holdBorder.posZ;
+    }
+
+    fun void toggleTrack() {
+        if (this.trackPressed == 1) {
+            this.resetTrack();
+        } else if (this.trackPressed == 0) {
+            this.clickTrack();
+        }
+    }
+
+    fun void clickTrack() {
+        1 => this.trackPressed;
+        Color.BLUE => this.trackInside.color;
+        @(4., 4., 4., 1.) => this.track.color;
+
+        this.track.posZ() - 0.02 => this.track.posZ;
+        this.trackBorder.posZ() - 0.02 => this.trackBorder.posZ;
+    }
+
+    fun void resetTrack() {
+        0 => this.trackPressed;
+        Color.BLACK => this.trackInside.color;
+        @(2., 2., 2., 1.) => this.track.color;
+
+        this.track.posZ() + 0.02 => this.track.posZ;
+        this.trackBorder.posZ() + 0.02 => this.trackBorder.posZ;
     }
 
     fun void resetTime() {
@@ -685,12 +737,14 @@ public class HoldVisualizer extends GGen {
     fun void setTheme(Theme newTheme) {
         newTheme.primary => this.inside.color;
         newTheme.primary => this.holdInside.color;
+        newTheme.primary => this.trackInside.color;
         newTheme.primary => this.nowInside.color;
         newTheme.primary => this.sec2Inside.color;
         newTheme.primary => this.sec5Inside.color;
 
         newTheme.secondary => this.border.color;
         newTheme.secondary => this.holdBorder.color;
+        newTheme.secondary => this.trackBorder.color;
         newTheme.secondary => this.nowBorder.color;
         newTheme.secondary => this.sec2Border.color;
         newTheme.secondary => this.sec5Border.color;

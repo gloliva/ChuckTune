@@ -226,6 +226,7 @@ public class ColorVisualizer extends GGen {
 
     // Hold Color Shards
     int hold;
+    int track;
 
     // Color Panes
     ColorPane panesMap[0];
@@ -302,7 +303,7 @@ public class ColorVisualizer extends GGen {
     }
 
     fun void setTuning(Tuning tuning) {
-        if (this.hold == 1) return;
+        if (this.hold == 1 || this.track == 1) return;
         tuning @=> this.tuning;
     }
 
@@ -394,6 +395,27 @@ public class ColorVisualizer extends GGen {
         for (string key : keys) {
             this.removePane(key);
         }
+    }
+
+    fun void setTrack() {
+        1 => this.track;
+    }
+
+    fun void setTrack(dur wait) {
+        wait => now;
+        1 => this.track;
+        <<< "Set track", this.track >>>;
+    }
+
+    fun void releaseTrack() {
+        0 => this.track;
+
+        // string keys[0];
+        // this.panesMap.getKeys(keys);
+
+        // for (string key : keys) {
+        //     this.removePane(key);
+        // }
     }
 
     fun void changeLayer(int diff) {
@@ -649,11 +671,8 @@ public class ColorVisualizer extends GGen {
                     if (intervalIdx % 2 == 0) localDiff - 1 => localDiff;
 
                     (sign * 0.2 * localDiff) + (sign * yDiff) => y;
-                    <<<"Local Diff", localDiff, "YDiff", yDiff, "Y", y >>>;
 
                     sign * -1 => sign;
-                } else {
-                    <<<"YDiff", yDiff, "Y", y >>>;
                 }
                 interval.setY(y);
             }
