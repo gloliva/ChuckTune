@@ -196,6 +196,9 @@ public class ColorPane {
 
             // Remap interval name to list idx
             for (int idx; idx < this.numIntervals; idx++) {
+                if (idx >= this.intervals.size()) {
+                    break;
+                }
                 this.intervals[idx] @=> IntervalLine interval;
                 idx => this.intervalMapping[interval.intervalName];
             }
@@ -448,6 +451,10 @@ public class ColorVisualizer extends GGen {
         if (this.layerMode == this.BLEND_SHOW_INTERVALS) {
             // Remove intervals connected to this pane
             for (int idx; idx < pane.panelIdx; idx++) {
+                if (idx >= this.activePanes.size()) {
+                    break;
+                }
+
                 this.activePanes[idx] @=> ColorPane lowerPane;
                 this.tuning.file.getIntervalBetweenNotes(lowerPane.noteDiff, pane.noteDiff) => string intervalName;
 
