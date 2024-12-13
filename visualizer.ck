@@ -106,6 +106,10 @@ public class IntervalLine extends GGen {
         this.intervalPane --> this;
     }
 
+    fun void setY(float y) {
+        y => this.posY;
+    }
+
     fun updateTheme(Theme theme) {
         theme.primary => this.intervalPane.inner.color;
         theme.secondary => this.line.color;
@@ -192,6 +196,7 @@ public class ColorPane {
 
             // Remap interval name to list idx
             for (int idx; idx < this.numIntervals; idx++) {
+                <<< "Num intervals", this.intervals.size(), "Interval Idx", idx >>>;
                 this.intervals[idx] @=> IntervalLine interval;
                 idx => this.intervalMapping[interval.intervalName];
             }
@@ -201,7 +206,13 @@ public class ColorPane {
 
     fun void clearIntervals() {
         this.intervals.clear();
-        this.intervalMapping.clear();
+
+        string keys[0];
+        this.intervalMapping.getKeys(keys);
+
+        for (string key : keys) {
+            this.intervalMapping.erase(key);
+        }
     }
 }
 
@@ -291,6 +302,7 @@ public class ColorVisualizer extends GGen {
     }
 
     fun void setTuning(Tuning tuning) {
+        if (this.hold == 1) return;
         tuning @=> this.tuning;
     }
 
@@ -502,6 +514,12 @@ public class ColorVisualizer extends GGen {
                     pane.noteVisuals --< this;
                     0 => pane.noteVisuals.visible;
                 }
+
+                for (IntervalLine interval : pane.intervals) {
+                    interval --< this;
+                }
+
+                pane.clearIntervals();
             }
         }
 
@@ -595,8 +613,8 @@ public class ColorVisualizer extends GGen {
                     this.shards[endPane.center] @=> GPlane endShard;
 
                     [
-                        @(startShard.posX(), startShard.posY()),
-                        @(endShard.posX(), endShard.posY())
+                        @(startShard.posX() + 0.015, startShard.posY()),
+                        @(endShard.posX() - 0.028, endShard.posY())
                     ] @=> vec2 points[];
 
                     IntervalLine interval(intervalName, this.theme, points, 0.05);
@@ -604,6 +622,40 @@ public class ColorVisualizer extends GGen {
                     startPane.updateVisualScale(this.scaX());
                     interval --> this;
                 }
+            }
+        } else {
+            for (ColorPane pane : this.activePanes) {
+                for (IntervalLine interval : pane.intervals) {
+                    interval --< this;
+                }
+
+                pane.clearIntervals();
+            }
+        }
+
+        // Interval Y pos
+        for (this.activePanes.size() - 1 => int idx; idx >= 0; idx--) {
+            this.activePanes[idx] @=> ColorPane pane;
+            (this.activePanes.size() - 2) - idx => float yDiff;
+            Std.scalef(yDiff, 0, this.activePanes.size(), 0., 0.6) => yDiff;
+
+            1 => int sign;
+            for (int intervalIdx; intervalIdx < pane.numIntervals; intervalIdx++) {
+                pane.intervals[intervalIdx] @=> IntervalLine interval;
+                yDiff => float y;
+
+                if (intervalIdx != 0) {
+                    intervalIdx => float localDiff;
+                    if (intervalIdx % 2 == 0) localDiff - 1 => localDiff;
+
+                    (sign * 0.2 * localDiff) + (sign * yDiff) => y;
+                    <<<"Local Diff", localDiff, "YDiff", yDiff, "Y", y >>>;
+
+                    sign * -1 => sign;
+                } else {
+                    <<<"YDiff", yDiff, "Y", y >>>;
+                }
+                interval.setY(y);
             }
         }
     }
