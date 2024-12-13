@@ -102,6 +102,24 @@ public class TuningRegister {
 }
 
 
+public class Note {
+    string name;
+    string key;
+    float freq;
+
+    fun @construct(string name, float freq) {
+        name => this.name;
+        freq => this.freq;
+    }
+
+    fun @construct(string name, string key, float freq) {
+        name => this.name;
+        key => this.key;
+        freq => this.freq;
+    }
+}
+
+
 public class Tuning {
     float startFreq;
     float freqDegrees[0];
@@ -126,9 +144,9 @@ public class Tuning {
         0 => int octaveDiff;
 
         // Handle negative note diff
-        if (degree < 0) {
+        while (degree < 0) {
             this.divisions + degree => degree;
-            -1 => octaveDiff;
+            -1 + octaveDiff => octaveDiff;
         }
 
         // Calculate Frequency
@@ -148,6 +166,34 @@ public class Tuning {
         }
 
         return freq;
+    }
+
+    fun Note getClosestMatchingFreq(float otherFreq) {
+        // TODO: fix magic numbers
+        float lowerFreq;
+        float upperFreq;
+
+        -10 => int degree;
+        while (degree < 50) {
+            this.freq(degree) => float currFreq;
+            if (currFreq > otherFreq) {
+                currFreq => upperFreq;
+                break;
+            }
+
+            currFreq => lowerFreq;
+            degree++;
+        }
+
+        float freq;
+        if (Std.fabs(otherFreq - lowerFreq) < Std.fabs(upperFreq - otherFreq)) {
+            lowerFreq => freq;
+        } else {
+            upperFreq => freq;
+        }
+
+        this.file.get(degree) => string name;
+        return new Note(name, freq);
     }
 
     fun void print() {
