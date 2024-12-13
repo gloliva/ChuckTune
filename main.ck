@@ -304,9 +304,7 @@ while (true) {
             kb2.getClosestMatchingFreq(freq) @=> Note secondNote;
             colorMapper.freqToColor( register, secondNote.freq ) @=> vec3 secondKeyColor;
             colorMapper.freqToShard( register, secondNote.freq ) => int secondShardCenter;
-            <<< "second note", secondNote.degree >>>;
-
-            secondaryVisualizer.addPane(key.key, secondKeyColor, secondShardCenter, secondNote.name, noteDiff, secondNote.degree);
+            secondaryVisualizer.addPane(key.key, secondKeyColor, secondShardCenter, secondNote.name, secondNote.degree);
         }
     }
 
