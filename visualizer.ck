@@ -78,6 +78,12 @@ public class IntervalLine extends GGen {
     NotePane @ intervalPane;
 
     string intervalName;
+    int notSet;
+
+    fun @construct(string intervalName) {
+        intervalName => this.intervalName;
+        1 => this.notSet;
+    }
 
     fun @construct(string intervalName, Theme theme, vec2 points[], float width) {
         intervalName => this.intervalName;
@@ -184,6 +190,10 @@ public class ColorPane {
 
     fun IntervalLine getInterval(string intervalName) {
         this.intervalMapping[intervalName] => int idx;
+        if (idx >= this.intervals.size()) {
+            return new IntervalLine(intervalName);
+        }
+
         return this.intervals[idx];
     }
 
@@ -458,7 +468,10 @@ public class ColorVisualizer extends GGen {
                 this.activePanes[idx] @=> ColorPane lowerPane;
                 this.tuning.file.getIntervalBetweenNotes(lowerPane.noteDiff, pane.noteDiff) => string intervalName;
 
-                lowerPane.getInterval(intervalName) --< this;
+                lowerPane.getInterval(intervalName) @=> IntervalLine interval;
+                if (interval.notSet == 0) {
+                    lowerPane.getInterval(intervalName) --< this;
+                }
                 lowerPane.removeInterval(intervalName);
             }
 
