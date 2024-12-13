@@ -105,6 +105,7 @@ public class TuningRegister {
 public class Note {
     string name;
     string key;
+    int degree;
     float freq;
 
     fun @construct(string name, float freq) {
@@ -112,9 +113,9 @@ public class Note {
         freq => this.freq;
     }
 
-    fun @construct(string name, string key, float freq) {
+    fun @construct(string name, int degree, float freq) {
         name => this.name;
-        key => this.key;
+        degree => this.degree;
         freq => this.freq;
     }
 }

@@ -97,7 +97,8 @@ secondaryVisualizer.setScale(0.92, 0.8, 1.);
 
 // Keyboard and Mouse Input
 KeyPoller kp;
-Keyboard kb(tuningManager.getTuning());
+Keyboard kb(tuningManager.getTuning(), 0);
+Keyboard kb2(tuningManager.getTuning(), 1);
 MousePoller mp;
 
 // Themes
@@ -131,6 +132,9 @@ while (true) {
 
             // Update everything with new tuning
             kb.updateTuning(newTuning);
+            if (secondaryVisualizer.track == 0) {
+                kb2.updateTuning(newTuning);
+            }
             primaryVisualizer.setTuning(newTuning);
             secondaryVisualizer.setTuning(newTuning);
             tuningUI.setText(newTuning.name);
@@ -188,6 +192,7 @@ while (true) {
             if (holdUI.trackPressed == 0) {
                 secondaryVisualizer.releaseTrack();
                 secondaryVisualizer.setTuning(tuningManager.getTuning());
+                kb2.updateTuning(tuningManager.getTuning());
             }
         } else if (holdSelectMode != 0 && holdSelectMode != holdUI.HOLD_PRESS && holdSelectMode != holdUI.TRACK_PRESS) {
             holdUI.resetTime();
@@ -292,14 +297,17 @@ while (true) {
         kb.getNoteDiff(key.key) => int noteDiff;
         primaryVisualizer.addPane(key.key, keyColor, shardCenter, note, noteDiff);
 
-        // Handle secondary Visualizer
-        kb.getFreq(key.key, secondaryVisualizer.tuning) => float secondFreq;
-        colorMapper.freqToColor( register, secondFreq ) @=> vec3 secondKeyColor;
-        colorMapper.freqToShard( register, secondFreq ) => int secondShardCenter;
-        kb.getNoteName(key.keyRow, key.keyCol, secondaryVisualizer.tuning) => string secondNote;
-        kb.getNoteDiff(key.key, secondaryVisualizer.tuning) => int secondNoteDiff;
+        if (secondaryVisualizer.track == 0) {
+            secondaryVisualizer.addPane(key.key, keyColor, shardCenter, note, noteDiff);
+        } else {
+            // Handle secondary Visualizer
+            kb2.getClosestMatchingFreq(freq) @=> Note secondNote;
+            colorMapper.freqToColor( register, secondNote.freq ) @=> vec3 secondKeyColor;
+            colorMapper.freqToShard( register, secondNote.freq ) => int secondShardCenter;
+            <<< "second note", secondNote.degree >>>;
 
-        secondaryVisualizer.addPane(key.key, secondKeyColor, secondShardCenter, secondNote, secondNoteDiff);
+            secondaryVisualizer.addPane(key.key, secondKeyColor, secondShardCenter, secondNote.name, noteDiff, secondNote.degree);
+        }
     }
 
     kp.getKeyRelease() @=> Key keysUp[];

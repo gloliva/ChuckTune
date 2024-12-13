@@ -1,5 +1,6 @@
 @import "files.ck"
 @import "themes.ck"
+@import "tuning.ck"
 
 
 public class Keyboard {
@@ -8,11 +9,13 @@ public class Keyboard {
 
     // Keyboard Visualizer
     Tuning @ tuning;
-    KeyboardVisuals visuals;
+    KeyboardVisuals @ visuals;
 
-    fun @construct(Tuning tuning) {
+    fun @construct(Tuning tuning, int hideVisuals) {
         48 => this.midiBase;
         tuning @=> this.tuning;
+        new KeyboardVisuals(hideVisuals) @=> this.visuals;
+
         this.setUpKeyMapping();
         this.setUpVisuals();
     }
@@ -44,6 +47,38 @@ public class Keyboard {
         tuning.file.keyboardToMidi[key] => int idx;
         tuning.file.get(idx) => string note;
         return note;
+    }
+
+    fun Note getClosestMatchingFreq(float otherFreq) {
+        // TODO: fix magic numbers
+        float lowerFreq;
+        float upperFreq;
+
+        -10 => int degree;
+        while (degree < 50) {
+            if (this.tuning.file.midiToKeyboard.isInMap(Std.itoa(degree))) {
+                this.tuning.file.getKeyFromMidi(degree) => string key;
+                this.getFreq(key) => float currFreq;
+                if (currFreq > otherFreq) {
+                    currFreq => upperFreq;
+                    break;
+                }
+
+                currFreq => lowerFreq;
+            }
+            degree++;
+        }
+
+        otherFreq => float freq;
+        if (Std.fabs(otherFreq - lowerFreq) < Std.fabs(upperFreq - otherFreq)) {
+            lowerFreq => freq;
+            degree - 1 => degree;
+        } else {
+            upperFreq => freq;
+        }
+
+        this.tuning.file.get(degree) => string name;
+        return new Note(name, degree, freq);
     }
 
     fun void updateTuning(Tuning tuning) {
@@ -266,7 +301,7 @@ public class KeyboardVisuals extends GGen {
     [-2.5, -2.8, -3.1, -3.4] @=> float xPos[];
     [-3., -2.41, -1.82, -1.23] @=> float yPos[];
 
-    fun @construct() {
+    fun @construct(int hideVisuals) {
         for (int idx; idx < this.rows.size(); idx++) {
             this.rows[idx] @=> KeyboardRow row;
 
@@ -294,7 +329,9 @@ public class KeyboardVisuals extends GGen {
         "Keyboard Visualizer" => this.name;
 
         // Connections
-        this --> GG.scene();
+        if (!hideVisuals) {
+            this --> GG.scene();
+        }
     }
 
     fun void addKey(int row, string note, string key) {

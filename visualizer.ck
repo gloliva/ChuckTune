@@ -121,6 +121,7 @@ public class ColorPane {
     vec3 color;
     string noteName;
     int noteDiff;
+    int secondNoteDiff;
     int panelIdx;
 
     // Visualizer position
@@ -133,6 +134,11 @@ public class ColorPane {
     IntervalLine intervals[0];
     int intervalMapping[0];
     int numIntervals;
+
+    fun @construct(vec3 color, string noteName, int noteDiff, int secondNoteDiff, int center, int length, int upperMax) {
+        secondNoteDiff => this.secondNoteDiff;
+        ColorPane(color, noteName, noteDiff, center, length, upperMax);
+    }
 
     fun @construct(vec3 color, string noteName, int noteDiff, int center, int length, int upperMax) {
         color => this.color;
@@ -157,6 +163,10 @@ public class ColorPane {
 
     fun void setPanelIdx(int idx) {
         idx => this.panelIdx;
+    }
+
+    fun void setSecondNoteDiff(int diff) {
+        diff => this.secondNoteDiff;
     }
 
     fun updateVisualScale(float visualizerXScale) {
@@ -196,7 +206,6 @@ public class ColorPane {
 
             // Remap interval name to list idx
             for (int idx; idx < this.numIntervals; idx++) {
-                <<< "Num intervals", this.intervals.size(), "Interval Idx", idx >>>;
                 this.intervals[idx] @=> IntervalLine interval;
                 idx => this.intervalMapping[interval.intervalName];
             }
@@ -206,6 +215,7 @@ public class ColorPane {
 
     fun void clearIntervals() {
         this.intervals.clear();
+        0 => this.numIntervals;
 
         string keys[0];
         this.intervalMapping.getKeys(keys);
@@ -409,13 +419,6 @@ public class ColorVisualizer extends GGen {
 
     fun void releaseTrack() {
         0 => this.track;
-
-        // string keys[0];
-        // this.panesMap.getKeys(keys);
-
-        // for (string key : keys) {
-        //     this.removePane(key);
-        // }
     }
 
     fun void changeLayer(int diff) {
@@ -435,10 +438,14 @@ public class ColorVisualizer extends GGen {
     }
 
     fun void addPane(string key, vec3 color, int shardCenter, string noteName, int noteDiff) {
+        this.addPane(key, color, shardCenter, noteName, noteDiff, -1);
+    }
+
+    fun void addPane(string key, vec3 color, int shardCenter, string noteName, int noteDiff, int secondNoteDiff) {
         // Skip if in hold mode
         if (this.hold == 1) return;
 
-        ColorPane pane(color, noteName, noteDiff, shardCenter, 125, this.shards.size());
+        ColorPane pane(color, noteName, noteDiff, secondNoteDiff, shardCenter, 125, this.shards.size());
         pane.updateVisualScale(this.scaX());
         this.addPaneToActiveList(pane);
 
@@ -569,10 +576,10 @@ public class ColorVisualizer extends GGen {
                     int topLowerIdx;
 
                     if (topPane.lower < bottomPane.center) {
-                        bottomPane.center + 1 => topLowerIdx;
+                        bottomPane.center + 3 => topLowerIdx;
                         // <<< "New IDX", topLowerIdx, "Old IDX", topPane.lower >>>;
                     } else {
-                        topPane.lower => topLowerIdx;
+                        topPane.lower - 3 => topLowerIdx;
                     }
 
                     this.shards[topLowerIdx].color() => vec3 bottomColor;
@@ -622,7 +629,17 @@ public class ColorVisualizer extends GGen {
                 this.activePanes[outerIdx] @=> ColorPane startPane;
                 for (outerIdx + 1 => int innerIdx; innerIdx < this.activePanes.size(); innerIdx++) {
                     this.activePanes[innerIdx] @=> ColorPane endPane;
-                    this.tuning.file.getIntervalBetweenNotes(startPane.noteDiff, endPane.noteDiff) => string intervalName;
+
+                    int startDiff;
+                    int endDiff;
+                    if (this.track) {
+                        startPane.secondNoteDiff => startDiff;
+                        endPane.secondNoteDiff => endDiff;
+                    } else {
+                        startPane.noteDiff => startDiff;
+                        endPane.noteDiff => endDiff;
+                    }
+                    this.tuning.file.getIntervalBetweenNotes(startDiff, endDiff) => string intervalName;
 
                     if (startPane.checkInterval(intervalName)) {
                         // Interval already exists, skip

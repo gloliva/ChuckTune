@@ -3,6 +3,7 @@ public class TuningFile {
     int noteMapping[0];
     string intervalMapping[0];
     int keyboardToMidi[0];
+    string midiToKeyboard[0];
     int length;
 
     fun void addNote(string note) {
@@ -17,6 +18,7 @@ public class TuningFile {
 
     fun void addKey(string key, int midiDiff) {
         midiDiff => this.keyboardToMidi[key];
+        key => this.midiToKeyboard[Std.itoa(midiDiff)];
     }
 
     fun string get(int idx) {
@@ -30,6 +32,11 @@ public class TuningFile {
 
     fun int getIdx(string note) {
         return this.noteMapping[note];
+    }
+
+    fun string getKeyFromMidi(int midi) {
+        Std.itoa(midi) => string midiDiff;
+        return this.midiToKeyboard[midiDiff];
     }
 
     fun string getIntervalBetweenNotes(int lowerIdx, int upperIdx) {
