@@ -245,6 +245,8 @@ public class ColorVisualizer extends GGen {
     ColorPane panesMap[0];
     ColorPane activePanes[0];
 
+    GText tuningName;
+
     // Tuning
     Tuning @ tuning;
 
@@ -279,6 +281,12 @@ public class ColorVisualizer extends GGen {
         tuning @=> this.tuning;
         12 => this.activePanes.capacity;
         1 => this.layerMode;
+
+        // Tuning text
+        tuning.name => this.tuningName.text;
+        this.tuningName --> GG.scene();
+        @(0.1, 0.1, 0.1) => this.tuningName.sca;
+        @(4., 4., 4., 1.) => this.tuningName.color;
 
         // Handle shards
         (this.shards.size() / 2 )$int => int midPoint;
@@ -318,6 +326,7 @@ public class ColorVisualizer extends GGen {
     fun void setTuning(Tuning tuning) {
         if (this.hold == 1 || this.track == 1) return;
         tuning @=> this.tuning;
+        tuning.name => this.tuningName.text;
     }
 
     fun void setTheme(Theme theme) {
@@ -366,6 +375,12 @@ public class ColorVisualizer extends GGen {
         x => this.posX;
         y => this.posY;
         z => this.posZ;
+    }
+
+    fun void setTuningNamePos(float x, float y) {
+        x => this.tuningName.posX;
+        y => this.tuningName.posY;
+        0.005 => this.tuningName.posZ;
     }
 
     fun void setScale(float x, float y, float z) {

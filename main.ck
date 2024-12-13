@@ -93,10 +93,12 @@ AudioColorMapper colorMapper;
 ColorVisualizer primaryVisualizer(tuningManager.getTuning());
 primaryVisualizer.setPos(0.6, 0.4, -0.05);
 primaryVisualizer.setScale(0.92, 0.8, 1.);
+primaryVisualizer.setTuningNamePos(-3.65, 1.11);
 
 ColorVisualizer secondaryVisualizer(tuningManager.getTuning());
 secondaryVisualizer.setPos(0.6, 2.05, -0.05);
 secondaryVisualizer.setScale(0.92, 0.8, 1.);
+secondaryVisualizer.setTuningNamePos(-3.65, 2.74);
 
 // Keyboard and Mouse Input
 KeyPoller kp;
@@ -325,9 +327,9 @@ while (true) {
 
     GG.nextFrame() => now;
     // UI
-    if (UI.begin("ChuckTune")) {
-        // show a UI display of the current scenegraph
-        UI.scenegraph(GG.scene());
-    }
-    UI.end();
+    // if (UI.begin("ChuckTune")) {
+    //     // show a UI display of the current scenegraph
+    //     UI.scenegraph(GG.scene());
+    // }
+    // UI.end();
 }
